@@ -8,7 +8,7 @@ import (
 func checkRPCHealth() () {
 
     // Load config
-    config, err := loadConfig("secrets.toml")
+    config, err := loadConfig("../secrets.toml")
     if err != nil {
         log.Fatal("Error loading config:", err)
     }

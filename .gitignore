@@ -22,3 +22,6 @@ go.work
 secrets.toml
 
 *.csv
+.env
+
+.DS_Store

@@ -1,0 +1,126 @@
+package main
+
+import (
+	"encoding/csv"
+	"flag"
+	"fmt"
+	"log"
+	"os"
+	"time"
+)
+
+var networkNameMapping = map[string]string{
+	"polygon-mainnet": "POLY",
+	"binance_smart_chain-mainnet": "BSC",
+	"ethereum-mainnet": "ETH",
+	"avalanche-mainnet": "AVAX",
+	"ethereum-mainnet-optimism-1": "OPT",
+	"wemix-mainnet": "WEMIX",
+	"ethereum-mainnet-kroma-1": "KROMA",
+	"ethereum-mainnet-arbitrum-1": "ARB",
+	"ethereum-mainnet-base-1": "BASE",
+
+	// testnet mappings
+	"polygon-testnet-mumbai": "POLY_TEST",
+	// Add more reversed mappings here
+}
+
+func main() {
+	// Define and parse the command-line flag
+	var messageId string
+	flag.StringVar(&messageId, "msg", "", "Message ID to query")
+	flag.Parse()
+
+	if messageId == "" {
+		log.Fatal("You must provide a message ID using the -msg flag.")
+	}
+
+	tokenMap, err := LoadTokenMapFromToml("tokens.toml")
+	if err != nil {
+		fmt.Println("Error loading token map:", err)
+		return
+	}
+
+	// Generate the query string
+	queryURL := GenerateMessageQueryString(messageId)
+	fmt.Println("Querying the API with URL:", queryURL)
+
+	// Query the API
+	response, err := QueryMessageAPI(queryURL)
+	if err != nil {
+		log.Fatalf("Failed to query the API: %v", err)
+	}
+
+	file, err := os.Create("messages.csv")
+	if err != nil {   
+		fmt.Println("Error creating CSV file:", err)
+		return
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	if len(response.Data.AllCcipMessages.Nodes) > 0 {
+		node := response.Data.AllCcipMessages.Nodes[0]
+		// fmt.Printf("%-24s %s\n", "SendTimestamp:", node.SendTimestamp)
+		// fmt.Printf("%-24s %s\n", "SendFinalized:", node.SendFinalized)
+		// fmt.Printf("%-24s %s\n", "CommitBlockTimestamp:", node.CommitBlockTimestamp)
+		// fmt.Printf("%-24s %s\n", "BlessBlockTimestamp:", node.BlessBlockTimestamp)
+		// fmt.Printf("%-24s %s\n", "ReceiptTimestamp:", node.ReceiptTimestamp)
+		// fmt.Printf("%-24s %s\n", "ReceiptFinalized:", node.ReceiptFinalized)
+
+		layout := "2006-01-02T15:04:05"
+		sendTime, _ := time.Parse(layout, node.SendTimestamp)
+		sendFinal, _ := time.Parse(layout, node.SendFinalized)
+		commitTime, _ := time.Parse(layout, node.CommitBlockTimestamp)
+		blessTime, _ := time.Parse(layout, node.BlessBlockTimestamp)
+		receiptTime, _ := time.Parse(layout, node.ReceiptTimestamp)
+		receiptFinal, _ := time.Parse(layout, node.ReceiptFinalized)
+	
+		sendToSendFinalDuration := sendFinal.Sub(sendTime)
+		sendFinalToCommitDuration := commitTime.Sub(sendFinal)
+		commitToBlessDuration := blessTime.Sub(commitTime)
+		blessToReceiptDuration := receiptTime.Sub(blessTime)
+		receiptToFinalDuration := receiptFinal.Sub(receiptTime)
+		
+		sourceNetworkMapped := networkNameMapping[node.SourceNetworkName]
+		destNetworkMapped := networkNameMapping[node.DestNetworkName]
+		
+		fmt.Printf("Message ID: %s\n", node.MessageId)
+		resolvedFeeToken, exists := GetTokenName( tokenMap, node.FeeToken)
+		if exists {
+			fmt.Println("Fee token: ", resolvedFeeToken)
+		} else {
+			fmt.Println("Fee token: ", node.FeeToken)
+		}
+		fmt.Println("Send timestamp:", node.SendTimestamp)
+		fmt.Println("Lane: ", sourceNetworkMapped, "to", destNetworkMapped)
+		fmt.Printf("%-24s %s\n", "Send to SendFinal:", sendToSendFinalDuration)
+		fmt.Printf("%-24s %s\n", "SendFinal to Commit:", sendFinalToCommitDuration)
+		fmt.Printf("%-24s %s\n", "Commit to Bless:", commitToBlessDuration)
+		fmt.Printf("%-24s %s\n", "Bless to Receipt:", blessToReceiptDuration)
+		fmt.Printf("%-24s %s\n", "Receipt to ReceiptFinal:", receiptToFinalDuration)
+		
+		header := []string{	"msdId", "SourceNetwork", "DestinationNetwork", "FeeToken", "SendToSendFinal", "SendFinaltToCommit", 
+							"CommitToBless", "BlessToReceipt", "ReceiptToReceiptFinal"}
+
+		if err := writer.Write(header); err != nil {
+			fmt.Println("Error writing header to CSV file:", err)
+			return
+		}
+
+		row := []string{node.MessageId, sourceNetworkMapped, destNetworkMapped, resolvedFeeToken,
+						sendToSendFinalDuration.String(), sendFinalToCommitDuration.String(),
+						commitToBlessDuration.String(), blessToReceiptDuration.String(),
+						receiptToFinalDuration.String()}
+		if err := writer.Write(row); err != nil {
+			fmt.Println("Error writing row to CSV file:", err)
+			return
+		}
+	} else {
+		fmt.Println("No data found for the provided message ID")
+	}
+
+
+}

@@ -6,7 +6,6 @@ require (
 	github.com/BurntSushi/toml v1.3.2
 	github.com/ethereum/go-ethereum v1.13.11
 	github.com/gorilla/websocket v1.5.1
-	golang.org/x/text v0.14.0
 )
 
 require (

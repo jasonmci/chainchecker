@@ -6,8 +6,6 @@ import (
 	"os"
 )
 
-
-
 var networkNameMapping = map[string]string{
 	"POLY": "polygon-mainnet",
 	"BSC": "binance_smart_chain-mainnet",
@@ -19,14 +17,17 @@ var networkNameMapping = map[string]string{
 	"ARB": "ethereum-mainnet-arbitrum-1",
 	"BASE": "ethereum-mainnet-base-1",
 
+	"POLY_TEST": "polygon-testnet-mumbai",
+
 	// Add more mappings here
 }
 
 func main() {
-	
+
+	fmt.Println("Network Name Mapping:", networkNameMapping)
 	// Parse the command-line flags
 	args := ParseFlags()
-	
+	fmt.Println("Parsed command-line arguments:", args)
 	if args.Sender == "" {
 		fmt.Println("The -sender flag is required.")
 		os.Exit(1)
@@ -42,7 +43,7 @@ func main() {
 	//fmt.Println("Resolved fee token address:", strings.ToLower(resolvedFeeToken))
 	url := GenerateQueryString(args.Sender, args.Receiver, args.Source, args.Dest, args.MessageId, resolvedFeeToken, args.First, args.Offset )
 	fmt.Println("Querying API with URL:", url)
-	apiResponse, nil := QueryAPI(url)
+	apiResponse, nil := QueryTransactionsAPI(url)
 
 	file, err := os.Create("transactions.csv")
 	if err != nil {   
@@ -53,6 +54,21 @@ func main() {
 
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
+
+	// Create a new map for reverse lookup
+	var reversedNetworkNameMapping = make(map[string]string)
+
+	// Fill the reversed map with values from networkNameMapping
+	for shortCode, descriptiveName := range networkNameMapping {
+		reversedNetworkNameMapping[descriptiveName] = shortCode
+	}
+
+	shortCode, exists := reversedNetworkNameMapping["ethereum-mainnet"]
+	if exists {
+		fmt.Println(shortCode) // This will print "ETH"
+	} else {
+		fmt.Println("Short code not found")
+	}
 
 	// Updated header to include destination fields
 	header := []string{	"Source Network Name",  "Dest Network Name", "Fee Token", "Message URL", "Source Scan URL", 
@@ -83,8 +99,8 @@ func main() {
 		destScanURL := constructScanURL(node.DestNetworkName, node.DestTransactionHash, &config)
 		messageURL := constructMessageURL(node.MessageID)
 		record := []string{
-			node.SourceNetworkName,
-			node.DestNetworkName,
+			reversedNetworkNameMapping[node.SourceNetworkName],
+			reversedNetworkNameMapping[node.DestNetworkName],
 			tokenName,
 			sourceScanURL,
 			destScanURL,
@@ -98,9 +114,11 @@ func main() {
 			return
 		}
 		fmt.Println("-----")
-		fmt.Println("✅ " + messageURL)
-		fmt.Println("✅ " + sourceScanURL)
-		fmt.Println("✅ " + destScanURL)
+		fmt.Printf("[msg](%s)\n", messageURL)
+		fmt.Printf("[%s](%s)\n", reversedNetworkNameMapping[node.SourceNetworkName], sourceScanURL)
+		fmt.Printf("[%s](%s)\n", reversedNetworkNameMapping[node.DestNetworkName], destScanURL)
+		
+		
 	}
 
 	fmt.Println("-----")
