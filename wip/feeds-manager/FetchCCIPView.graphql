@@ -1,0 +1,61 @@
+query FetchCCIPView {
+  ccip {
+    chains(filter: {isArchived: false}) {
+      ...CCIPView_ChainFields
+      __typename
+    }
+    lanes(filter: {isArchived: false}) {
+      ...CCIPView_LaneFields
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment CCIPView_ChainFields on CCIPChain {
+  ...CCIP_ChainFields
+  contracts {
+    id
+    name
+    address
+    tag
+    transferOwnershipStatus
+    __typename
+  }
+  __typename
+}
+
+fragment CCIP_ChainFields on CCIPChain {
+  id
+  displayName
+  network {
+    ...NetworkDisplayFields
+    chainID
+    chainType
+    __typename
+  }
+  __typename
+}
+
+fragment NetworkDisplayFields on Network {
+  id
+  name
+  iconName
+  explorerURL
+  __typename
+}
+
+fragment CCIPView_LaneFields on CCIPLane {
+  id
+  displayName
+  status
+  chainA {
+    ...CCIP_ChainFields
+    __typename
+  }
+  chainB {
+    ...CCIP_ChainFields
+    __typename
+  }
+  __typename
+}

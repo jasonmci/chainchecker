@@ -1,0 +1,18 @@
+query FetchProfileHook {
+  profile {
+    id
+    email
+    name
+    role
+    permits
+    __typename
+  }
+  buildInfo {
+    version
+    __typename
+  }
+  ccip {
+    contractsCodeVersion
+    __typename
+  }
+}

@@ -90,7 +90,7 @@ type Info struct {
 func GenerateMessageQueryString(messageId string ) string {
 	baseURL := "https://ccip.chain.link/api/query"
 	queryParams := url.Values{}
-	queryParams.Add("query", "MESSAGE_DETAILS_QUERY")
+	//queryParams.Add("query", "MESSAGE_DETAILS_QUERY")
 
 	// Convert the condition map and other variables into a JSON string
 	variables := map[string]interface{}{

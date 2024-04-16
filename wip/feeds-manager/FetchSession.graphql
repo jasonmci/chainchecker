@@ -1,0 +1,11 @@
+query FetchSession {
+    session {
+        id
+        token
+        expiresAt
+        revoked
+        permits
+        __typename
+    }
+}
+
