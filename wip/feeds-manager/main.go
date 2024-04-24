@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -9,53 +9,6 @@ import (
 
 	"github.com/joho/godotenv"
 )
-
-// Structs based on the JSON structure
-type Network struct {
-    Name string `json:"name"`
-}
-
-type Chain struct {
-    Network Network `json:"network"`
-}
-
-type CCIP struct {
-    Chains []Chain `json:"chains"`
-}
-
-type Data struct {
-    CCIP CCIP `json:"ccip"`
-}
-
-type Response struct {
-    Data Data `json:"data"`
-}
-
-// Network mappings from short name to full name
-var networkMappings = map[string]string{
-    "KROMA": "Kroma Mainnet",
-    "WEMIX": "WEMIX Mainnet",
-    "GNO":   "GnosisChain Mainnet",
-    "POLYX": "Polygon zkEVM Mainnet",
-    "OPT":   "Optimism Mainnet",
-    "AVAX":  "Avalanche Mainnet",
-    "POLY":  "Polygon Mainnet",
-    "BSC":   "BSC Mainnet",
-    "ETH":   "Ethereum Mainnet",
-    "ARB":   "Arbitrum Mainnet",
-    "BASE":  "Base Mainnet",
-}
-
-func fetchNetworkDetails(data *Data, networkName string) {
-    fmt.Printf("Details for %s:\n", networkName)
-    for _, chain := range data.CCIP.Chains {
-        if chain.Network.Name == networkName {
-            fmt.Printf(" - Network Name: %s\n", chain.Network.Name)
-            return
-        }
-    }
-    fmt.Println("Network not found.")
-}
 
 func main() {
     // Load environment variables from .env file
@@ -68,9 +21,8 @@ func main() {
     password    := os.Getenv("FEEDS_MANAGER_PASSWORD")
 
     // Setup command line flags
-    listNetworks := flag.Bool("list", false, "List all networks")
-    shortName := flag.String("network", "", "Short network name to fetch details for")
-    flag.Parse()
+    //listNetworks := flag.Bool("list", false, "List all networks")
+    //shortName := flag.String("network", "", "Short network name to fetch details for")
     flag.Parse()
 
     token, err := LoginUser(username, password)
@@ -81,44 +33,47 @@ func main() {
     
     FetchSession(token)
     FetchProfileHook(token)
-    jsonData := FetchCCIPView(token)
+    //FetchCCIPView(token)
+    //FetchChainDetails(token, "21")
+    fmt.Println("=-=-=-=-=-=-=-")
+    FetchLaneDetails(token, "7")
+    // chainId := "21"
+    // chainResponse, err := FetchChainDetails(token, chainId)
+    // if err != nil {
+    //     log.Fatalf("Failed to fetch chain details: %v", err)
+    // }
 
-    // Parse JSON data into struct
-    var response Response
-    if err := json.Unmarshal(jsonData, &response); err != nil {
-        log.Fatalf("Error parsing JSON data: %v", err)
-    }
 
-    // Convert jsonData which is a string to a byte slice
-    jsonDataBytes := []byte(jsonData)
-    fmt.Println()
-    // Parse JSON data into struct
-    var data Data
-    if err := json.Unmarshal(jsonDataBytes, &data); err != nil {
-        log.Fatalf("Error parsing JSON data: %v", err)
-        fmt.Println(data)
-    }
+    // //Parse JSON data into struct
+    // var response Response
+    // if err := json.Unmarshal(jsonData, &response); err != nil {
+    //     log.Fatalf("Error parsing JSON data: %v", err)
+    // }
 
-    if *listNetworks {
-        for _, chain := range response.Data.CCIP.Chains {
-            fmt.Println(chain.Network.Name)
-        }
-    } else if *shortName != "" {
-        if fullName, ok := networkMappings[*shortName]; ok {
-            fetchNetworkDetails(&response.Data, fullName)
-        } else {
-            fmt.Println("Invalid network short name.")
-        }
-    } else {
-        fmt.Println("No command specified. Use -list to list all networks or -network to specify a network short name.")
-    }
+    // //Convert jsonData which is a string to a byte slice
+    // jsonDataBytes := []byte(jsonData)
+    // fmt.Println()
+    // //Parse JSON data into struct
+    // var data Data
+    // if err := json.Unmarshal(jsonDataBytes, &data); err != nil {
+    //     log.Fatalf("Error parsing JSON data: %v", err)
+    //     fmt.Println(data)
+    // }
 
-}
+    // if *listNetworks {
+    //     PrintNetworkMappings()
 
-// ListNetworkNames prints the names of all networks
-func ListNetworkNames(data *Data) {
-    fmt.Println("Listing all networks:")
-    for _, chain := range data.CCIP.Chains {
-        fmt.Printf(" - %s\n", chain.Network.Name)
-    }
+    // } else if *shortName != "" {
+    //     if fullName, ok := networkMappings[*shortName]; ok {
+    //         fmt.Printf("Fetching details for network: %s\n", fullName)
+    //     fetchNetworkDetails(&response.Data, fullName)
+    //     fmt.Printf("Chain Details: %+v\n", chainResponse)
+
+    // } else {
+    //         fmt.Println("Invalid network short name.")
+    //     }
+    // } else {
+    //     fmt.Println("No command specified. Use -list to list all networks or -network to specify a network short name.")
+    // }
+
 }

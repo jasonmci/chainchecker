@@ -1,0 +1,131 @@
+query FetchCCIPChainDetailsView($id: ID!) {
+  ccip {
+    chain(id: $id) {
+      ...CCIPChainDetails_ChainFields
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment CCIPChainDetails_ChainFields on CCIPChain {
+  ...CCIP_ChainFields
+  deployedTemplate
+  supportedTokens {
+    ...CCIP_EVMBridgedTokenFields
+    __typename
+  }
+  contracts {
+    ...CCIP_ContractFields
+    __typename
+  }
+  workflowRuns {
+    ...WorkflowRunFields
+    __typename
+  }
+  __typename
+}
+
+fragment CCIP_ChainFields on CCIPChain {
+  id
+  displayName
+  network {
+    ...NetworkDisplayFields
+    chainID
+    chainType
+    __typename
+  }
+  __typename
+}
+
+fragment NetworkDisplayFields on Network {
+  id
+  name
+  iconName
+  explorerURL
+  __typename
+}
+
+fragment CCIP_EVMBridgedTokenFields on EVMBridgedToken {
+  token
+  address
+  priceType
+  tokenPoolType
+  __typename
+}
+
+fragment CCIP_ContractFields on Contract {
+  id
+  address
+  tag
+  transferOwnershipStatus
+  name
+  semver
+  metadata
+  ownerType
+  ownerAddress
+  pendingOwnerAddress
+  pendingOwnerType
+  network {
+    ...NetworkDisplayFields
+    __typename
+  }
+  __typename
+}
+
+fragment WorkflowRunFields on WorkflowRun {
+  id
+  name
+  status
+  workflowType
+  createdAt
+  actions {
+    ...ActionFields
+    __typename
+  }
+  __typename
+}
+
+fragment ActionFields on Action {
+  actionType
+  name
+  run {
+    ...ActionRunFields
+    __typename
+  }
+  tasks {
+    ...TaskFields
+    __typename
+  }
+  __typename
+}
+
+fragment ActionRunFields on ActionRun {
+  id
+  status
+  network {
+    ...NetworkDisplayFields
+    __typename
+  }
+  createdAt
+  __typename
+}
+
+fragment TaskFields on Task {
+  name
+  run {
+    ...TaskRunFields
+    __typename
+  }
+  __typename
+}
+
+fragment TaskRunFields on TaskRun {
+  error
+  id
+  input
+  output
+  status
+  txHash
+  __typename
+}

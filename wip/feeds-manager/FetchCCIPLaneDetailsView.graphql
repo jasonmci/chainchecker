@@ -1,0 +1,236 @@
+# GraphQL Query for Fetching CCIP Lane Details View
+query FetchCCIPLaneDetailsView($id: ID!) {
+  ccip {
+    lane(id: $id) {
+      ...CCIPLaneDetails_LaneFields
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment CCIPLaneDetails_LaneFields on CCIPLane {
+  ...CCIP_LaneFields
+  deployedTemplate
+  deployedProvisionalTemplate
+  legA {
+    ...CCIPLaneDetails_LegFields
+    __typename
+  }
+  legB {
+    ...CCIPLaneDetails_LegFields
+    __typename
+  }
+  legAProvisional {
+    ...CCIPLaneDetails_LegFields
+    __typename
+  }
+  legBProvisional {
+    ...CCIPLaneDetails_LegFields
+    __typename
+  }
+  chainA {
+    ...CCIP_ChainFields
+    __typename
+  }
+  chainB {
+    ...CCIP_ChainFields
+    __typename
+  }
+  __typename
+}
+
+fragment CCIP_LaneFields on CCIPLane {
+  id
+  displayName
+  status
+  __typename
+}
+
+fragment CCIPLaneDetails_LegFields on CCIPLaneLeg {
+  ...CCIP_LegFields
+  workflowRuns {
+    ...WorkflowRunFields
+    __typename
+  }
+  source {
+    ...CCIPLaneDetails_EndpointFields
+    __typename
+  }
+  destination {
+    ...CCIPLaneDetails_EndpointFields
+    __typename
+  }
+  dons {
+    ...CCIP_DONFields
+    __typename
+  }
+  __typename
+}
+
+fragment CCIP_LegFields on CCIPLaneLeg {
+  id
+  tag
+  status
+  __typename
+}
+
+fragment WorkflowRunFields on WorkflowRun {
+  id
+  name
+  status
+  workflowType
+  createdAt
+  actions {
+    ...ActionFields
+    __typename
+  }
+  __typename
+}
+
+fragment ActionFields on Action {
+  actionType
+  name
+  run {
+    ...ActionRunFields
+    __typename
+  }
+  tasks {
+    ...TaskFields
+    __typename
+  }
+  __typename
+}
+
+fragment ActionRunFields on ActionRun {
+  id
+  status
+  network {
+    ...NetworkDisplayFields
+    __typename
+  }
+  createdAt
+  __typename
+}
+
+fragment NetworkDisplayFields on Network {
+  id
+  name
+  iconName
+  explorerURL
+  __typename
+}
+
+fragment TaskFields on Task {
+  name
+  run {
+    ...TaskRunFields
+    __typename
+  }
+  __typename
+}
+
+fragment TaskRunFields on TaskRun {
+  error
+  id
+  input
+  output
+  status
+  txHash
+  __typename
+}
+
+fragment CCIPLaneDetails_EndpointFields on CCIPEndpoint {
+  chain {
+    ...CCIPLaneDetails_Endpoint_ChainFields
+    __typename
+  }
+  contracts {
+    ...CCIP_ContractFields
+    __typename
+  }
+  __typename
+}
+
+fragment CCIPLaneDetails_Endpoint_ChainFields on CCIPChain {
+  ...CCIP_ChainFields
+  contracts {
+    id
+    name
+    address
+    tag
+    transferOwnershipStatus
+    __typename
+  }
+  workflowRuns {
+    ...WorkflowRunFields
+    __typename
+  }
+  __typename
+}
+
+fragment CCIP_ChainFields on CCIPChain {
+  id
+  displayName
+  network {
+    ...NetworkDisplayFields
+    chainID
+    chainType
+    __typename
+  }
+  __typename
+}
+
+fragment CCIP_ContractFields on Contract {
+  id
+  address
+  tag
+  transferOwnershipStatus
+  name
+  semver
+  metadata
+  ownerType
+  ownerAddress
+  pendingOwnerAddress
+  pendingOwnerType
+  network {
+    ...NetworkDisplayFields
+    __typename
+  }
+  __typename
+}
+
+fragment CCIP_DONFields on DON {
+  id
+  executionType
+  jobs {
+    ...JobFields
+    __typename
+  }
+  __typename
+}
+
+fragment JobFields on Job {
+  id
+  status
+  isBootstrap
+  canPropose
+  canRevoke
+  proposalChanged
+  nodeOperator {
+    id
+    name
+    __typename
+  }
+  node {
+    id
+    name
+    __typename
+  }
+  assignableNodes {
+    id
+    name
+    __typename
+  }
+  __typename
+}
