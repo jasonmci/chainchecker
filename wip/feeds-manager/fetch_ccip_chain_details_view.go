@@ -14,7 +14,7 @@ import (
 	"os"
 )
 
-type ChainDetailResponse struct {
+type CCIPChainResponse struct {
     Data struct {
         CCIP struct {
             Chain struct {
@@ -195,7 +195,7 @@ func FetchChainDetails(sessionToken, chainID string) []byte {
     }
 
     // Parse the JSON response
-    var response ChainDetailResponse
+    var response CCIPChainResponse
     err = json.Unmarshal(responseBody, &response)
     if err != nil {
         log.Fatalf("Error parsing JSON response: %v", err)

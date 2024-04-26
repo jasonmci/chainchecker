@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-type GraphQLResponse struct {
+type CCIPViewResponse struct {
     Data struct {
         CCIP struct {
             Chains []struct {
@@ -116,7 +116,7 @@ func FetchCCIPView(sessionToken string) []byte {
     }
 
     // Parse the JSON response
-    var response GraphQLResponse
+    var response CCIPViewResponse
     err = json.Unmarshal(responseBody, &response)
     if err != nil {
         log.Fatalf("Error parsing JSON response: %v", err)

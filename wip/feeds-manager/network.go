@@ -1,7 +1,8 @@
 package main
 
 import (
-    "fmt"
+	"fmt"
+	"sort"
 )
 
 type Contract struct {
@@ -23,25 +24,24 @@ type Network struct {
     ChainType     string `json:"chainType"`
 }
 
-// type Chain struct {
-//     ID        string    `json:"id"`
-//     DisplayName string  `json:"displayName"`
-//     Network   Network   `json:"network"`
-//     Contracts []Contract `json:"contracts"`
-//     TypeName  string    `json:"__typename"`
-// }
+func normalizePair(net1, net2 string) (string, string) {
+    networks := []string{net1, net2}
+    sort.Strings(networks)  // Sorts the slice in ascending order.
+    return networks[0], networks[1]
+}
 
-// type CCIP struct {
-//     Chains []Chain `json:"chains"`
-// }
+var laneIDMap = map[string]string{
+    "ARB,ETH": "43",
+    "ETH,WEMIX": "51",
+    // Add more mappings as needed
+}
 
-// type Data struct {
-//     CCIP CCIP `json:"ccip"`
-// }
+func getLaneID(net1, net2 string) (string, bool) {
+    net1, net2 = normalizePair(net1, net2)
+    id, found := laneIDMap[net1+","+net2]
+    return id, found
+}
 
-// type Response struct {
-//     Data Data `json:"data"`
-// }
 
 // Network mappings from short name to full name
 var networkMappings = map[string]string{
@@ -65,6 +65,26 @@ func PrintNetworkMappings() {
         fmt.Printf("%-10s%s\n", shortName, fullName)
     }
 }
+
+var networkIDMap = map[string]string{
+    "OPT": "18",
+    "AVAX": "19",
+    "POLY": "20",
+    "ETH": "21",
+    "BSC": "22",
+    "ARB": "23",
+    "BASE": "24",
+    "WEMIX": "27",
+    "KROMA": "28",
+    "GNO": "30",
+    "POLYZ": "31",
+}
+
+func getNetworkID(networkName string) (string, bool) {
+    id, found := networkIDMap[networkName]
+    return id, found
+}
+
 
 // func fetchNetworkDetails(data *Data, networkName string) {
 //     found := false

@@ -14,14 +14,13 @@ import (
 	"os"
 )
 
-type LaneDetailResponse struct {
+type CCIPLaneResponse struct {
     Data struct {
         CCIP struct {
-            Lane CCIPLane `json:"lane"`
+            Lane CCIPLane `json:"lane"` // check on this
         } `json:"ccip"`
     } `json:"data"`
 }
-
 type CCIPLane struct {
     ID                        string     `json:"id"`
     DisplayName               string     `json:"displayName"`
@@ -300,7 +299,7 @@ func FetchLaneDetails(sessionToken, laneID string ) []byte {
     }
 
     // Parse the JSON response
-    var response LaneDetailResponse
+    var response CCIPLaneResponse
     err = json.Unmarshal(responseBody, &response)
     if err != nil {
         log.Fatalf("Error parsing JSON response: %v", err)
