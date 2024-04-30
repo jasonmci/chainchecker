@@ -173,6 +173,8 @@ func main() {
     FetchChainDetails(token, chainBId)
     // viewResponseBody := FetchCCIPView(token)
 
+    FetchLaneDetails(token, laneID)
+    
 
     // chainAResponseBody := FetchChainDetails(token, "21")
     // //chainBResponseBody := FetchChainDetails(token, "21")
