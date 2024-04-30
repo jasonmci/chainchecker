@@ -100,7 +100,31 @@ type CCIPChainResponse struct {
 
 type DeployedTemplate struct {
     ArmProxies map[string]ArmProxy `json:"armProxies"`
-    Arms       map[string]Arm      `json:"arms"`
+    Routers map[string]struct {
+        Status         string `json:"status"`
+        TypeAndVersion string `json:"typeAndVersion"`
+    } `json:"routers"`
+    PriceRegistries map[string]struct {
+        FeeTokens         []string `json:"feeTokens"`
+        PriceUpdaters     []string `json:"priceUpdaters"`
+        StalenessThreshold int     `json:"stalenessThreshold"`
+        Status             string  `json:"status"`
+        TypeAndVersion     string  `json:"typeAndVersion"`
+    } `json:"priceRegistries"` 
+    Arms map[string]struct {
+        IsCursed      bool   `json:"isCursed"`
+        Status        string `json:"status"`
+        TypeAndVersion string `json:"typeAndVersion"`
+        Config struct {
+            BlessWeightThreshold int `json:"blessWeightThreshold"`
+            CurseWeightThreshold int `json:"curseWeightThreshold"`
+        } `json:"config"`
+    } `json:"arms"`
+    Tokens map[string]struct {
+        PoolAddress    string `json:"poolAddress"`
+        TokenAddress   string `json:"tokenAddress"`
+        TypeAndVersion string `json:"typeAndVersion"`
+    } `json:"tokens"`
 }
 
 type ArmProxy struct {
@@ -117,7 +141,7 @@ type Arm struct {
 }
 
 type Config struct {
-    BlessWeightThreshold int       `json:"blessWeightThreshold"`
+    //BlessWeightThreshold int       `json:"blessWeightThreshold"`
     CurseWeightThreshold int       `json:"curseWeightThreshold"`
     Voters               []Voter   `json:"voters"`
 }
@@ -205,13 +229,76 @@ func FetchChainDetails(sessionToken, chainID string) []byte {
     for _, contract := range response.Data.CCIP.Chain.Contracts {
         fmt.Printf("Contract ID: %s, Name: %s, Token Symbol: %s, Address: %s, Tag %s, Semver %s\n", contract.ID, contract.Name, contract.Metadata.TokenSymbol, contract.Address, contract.Tag, contract.Semver)
     }
+    fmt.Println("--------------------------------------------------")
 
-        // Assuming you can directly access the DeployedTemplate from your response struct
-        for _, token := range response.Data.CCIP.Chain.SupportedTokens {
-            fmt.Printf("Token: %s, Address: %s, Price Type: %s, Token Pool Type: %s\n",
-                token.Token, token.Address, token.PriceType, token.TokenPoolType)
-        }
-    
+    fmt.Println("ARMs:")
+    for address, arm := range response.Data.CCIP.Chain.DeployedTemplate.Arms {
+        fmt.Printf("ARM Address: %s\n", address)
+        fmt.Printf("Is Cursed: %t\n", arm.IsCursed)
+        fmt.Printf("Status: %s\n", arm.Status)
+        fmt.Printf("Type and Version: %s\n", arm.TypeAndVersion)
+        fmt.Printf("Bless Weight Threshold: %d\n", arm.Config.BlessWeightThreshold)
+        fmt.Printf("Curse Weight Threshold: %d\n\n", arm.Config.CurseWeightThreshold)
+    }
+
+    // print some text as a separator
+    fmt.Println("--------------------------------------------------")
+
+    // print out arms details
+    for _, armProxy := range response.Data.CCIP.Chain.DeployedTemplate.ArmProxies {
+        fmt.Println("ARM Address:", armProxy.Arm)
+        fmt.Println("Status:", armProxy.Status)
+        fmt.Println("Type and Version:", armProxy.TypeAndVersion)
+    }
+
+    fmt.Println("--------------------------------------------------")
+
+    // Iterate over the routers map
+    for address, router := range response.Data.CCIP.Chain.DeployedTemplate.Routers {
+        fmt.Printf("Router Address: %s\n", address)
+        fmt.Printf("Status: %s\n", router.Status)
+        fmt.Printf("Type and Version: %s\n\n", router.TypeAndVersion)
+    }
+
+    fmt.Println("--------------------------------------------------")
+
+    // Iterate over the price registries map
+    fmt.Println("Price Registries:")
+    for address, registry := range response.Data.CCIP.Chain.DeployedTemplate.PriceRegistries {
+        fmt.Printf("Registry Address: %s\n", address)
+        fmt.Printf("Fee Tokens: %v\n", registry.FeeTokens)
+        fmt.Printf("Price Updaters: %v\n", registry.PriceUpdaters)
+        fmt.Printf("Staleness Threshold: %d\n", registry.StalenessThreshold)
+        fmt.Printf("Status: %s\n", registry.Status)
+        fmt.Printf("Type and Version: %s\n\n", registry.TypeAndVersion)
+    }
+
+    fmt.Println("--------------------------------------------------")
+    // Iterate over the tokens map
+    fmt.Println("Tokens:")
+    for tokenName, token := range response.Data.CCIP.Chain.DeployedTemplate.Tokens {
+        fmt.Printf("Token Name: %s\n", tokenName)
+        fmt.Printf("Pool Address: %s\n", token.PoolAddress)
+        fmt.Printf("Token Address: %s\n", token.TokenAddress)
+        fmt.Printf("Type and Version: %s\n\n", token.TypeAndVersion)
+    }
+    // Print the chain contracts details
+    // for _, contract := range response.Data.CCIP.Chain.Contracts {
+    //     fmt.Printf("Contract ID: %s, Name: %s, Token Symbol: %s, Address: %s, Tag %s, Semver %s\n", contract.ID, contract.Name, contract.Metadata.TokenSymbol, contract.Address, contract.Tag, contract.Semver)
+    // }
+
+    // for _, token := range response.Data.CCIP.Chain.SupportedTokens {
+    //     fmt.Printf("Token: %s, Address: %s, Price Type: %s, Token Pool Type: %s\n",
+    //     token.Token, token.Address, token.PriceType, token.TokenPoolType)
+    // }
+
+    // print the chain network details
+    fmt.Printf("Chain ID: %s, Display Name: %s, Network: %s, Chain Type: %s\n",
+        response.Data.CCIP.Chain.ID, response.Data.CCIP.Chain.DisplayName, response.Data.CCIP.Chain.Network.Name, response.Data.CCIP.Chain.Network.ChainType)
+
+    //fmt.Printf("ARM Address %s\n", response.Data.CCIP.Chain.DeployedTemplate)
+
+    // arm contract details
+
     return responseBody
-
 }

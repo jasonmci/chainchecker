@@ -1,7 +1,6 @@
 package main
 
 import (
-	//"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -67,8 +66,14 @@ func parseChainInfo(arg string) (ChainInfo, error) {
 // }
 
 
-func fetchDataForLane(chain ChainInfo) {
+func fetchDataForChain(chain ChainInfo) {
+
+    // fetch ccip chain response
+    //FetchChainDetails(chain.Network)
+
     fmt.Printf("Network: %s\n", chain.Network)
+
+
     fmt.Printf("Payment Tokens: %v\n", chain.PaymentTokens)
     fmt.Printf("Transfer Tokens: %v\n", chain.TransferTokens)
 
@@ -96,14 +101,14 @@ func fetchDataForLane(chain ChainInfo) {
     
     // and now we need to fetch the fee tokens for fees and tokens to transfer
 
-    // fetch fee tokens
-    fmt.Printf("Fetching Fee Tokens for network: %s\n", chain.Network)
+    // // fetch fee tokens
+    // fmt.Printf("Fetching Fee Tokens for network: %s\n", chain.Network)
 
-    // fetch tokens to transfer
-    fmt.Printf("Fetching Tokens to Transfer for network: %s\n", chain.Network)
+    // // fetch tokens to transfer
+    // fmt.Printf("Fetching Tokens to Transfer for network: %s\n", chain.Network)
 
-    // fetch token pool
-    fmt.Printf("Fetching Token Pool for network: %s\n", chain.Network)
+    // // fetch token pool
+    // fmt.Printf("Fetching Token Pool for network: %s\n", chain.Network)
 
         // Implement actual fetching logic here
 }
@@ -116,31 +121,27 @@ func main() {
     flag.StringVar(&b, "B", "", "Details for Lane B (network,paymentToken,transferToken)")
     flag.Parse()
 
-    laneA, err := parseChainInfo(a)
-    if err != nil {
-        fmt.Println("Error:", err)
-        return
-    }
+    // laneA, err := parseChainInfo(a)
+    // if err != nil {
+    //     fmt.Println("Error:", err)
+    //     return
+    // }
 
-    laneB, err := parseChainInfo(b)
-    if err != nil {
-        fmt.Println("Error:", err)
-        return
-    }
+    // laneB, err := parseChainInfo(b)
+    // if err != nil {
+    //     fmt.Println("Error:", err)
+    //     return
+    // }
 
-    // Assuming you have functions to handle the API calls
-    if laneA.Network != "" {
-        fmt.Println("Fetching data for Lane A...")
-        fetchDataForLane(laneA)
-    }
-
-    if laneB.Network != "" {
-        fmt.Println("Fetching data for Lane B...")
-        fetchDataForLane(laneB)
-    }
-
+    // Get the lane ID as a concatenation of the two network IDs
     partsA := strings.Split(a, ",")
     partsB := strings.Split(b, ",")
+
+    //use networkId map to get the chain ID
+    chainAId, _ := getNetworkID(partsA[0])
+    chainBId, _ := getNetworkID(partsB[0])
+
+
     laneID, _ := getLaneID(partsA[0], partsB[0])
 
     fmt.Printf("chain ID: %s, other chain ID: %s\n", partsA[0], partsB[0])
@@ -168,18 +169,41 @@ func main() {
     
     //FetchSession(token)
     //FetchProfileHook(token)
-    //FetchChainDetails(token, "21")
+    FetchChainDetails(token, chainAId)
+    FetchChainDetails(token, chainBId)
     // viewResponseBody := FetchCCIPView(token)
 
 
+    // chainAResponseBody := FetchChainDetails(token, "21")
+    // //chainBResponseBody := FetchChainDetails(token, "21")
 
-    //chainAResponseBody := FetchChainDetails(token, laneID)
+    // laneResponseBody := FetchLaneDetails(token, laneID)
+
+    // // print the non byte response of chainAResponseBody
+    // fmt.Println("Chain A Response:", chainAResponseBody)
+    // fmt.Println("Chain A Response:", string(laneResponseBody))
+
+    // if laneA.Network != "" {
+    //     fmt.Println("Fetching data for Lane A...")
+    //     fetchDataForChain(laneA)
+    // }
+
+    // if laneB.Network != "" {
+    //     fmt.Println("Fetching data for Lane B...")
+    //     fetchDataForChain(laneB)
+    // }
+
+
     //chainBResponseBody := FetchChainDetails(token, "21")
-    laneResponseBody := FetchLaneDetails(token, laneID)
+    //laneResponseBody := FetchLaneDetails(token, laneID)
+
 
     //fmt.Println("Chain A Response:", chainAResponseBody)
     //fmt.Println("Chain B Response:", chainBResponseBody)
-    fmt.Println("Lane Response:", laneResponseBody)
+    //fmt.Println("Lane Response:", laneResponseBody)
+
+    // convert laneResponseBody to json
+
 
     // var viewResponse CCIPViewResponse
     // if err := json.Unmarshal(viewResponseBody, &viewResponse); err != nil {
@@ -192,11 +216,12 @@ func main() {
     //         chain.ID, chain.DisplayName, chain.Network.Name)
     // }
 
-    // var chainResponse CCIPChainResponse
+    var chainResponse CCIPChainResponse
     // if err := json.Unmarshal(chainResponseBody, &chainResponse); err != nil {
     //     log.Fatalf("Error parsing JSON: %v", err)
     // }
     
+    fmt.Print("Chain Response: ", chainResponse.Data.CCIP.Chain.Network.ID)
     // // Example of using the data
     // for _, token := range chainResponse.Data.CCIP.Chain.SupportedTokens {
     //     fmt.Printf("Chain ID: %s, Display Name: %s, Network: %s\n",

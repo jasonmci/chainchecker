@@ -31,9 +31,36 @@ func normalizePair(net1, net2 string) (string, string) {
 }
 
 var laneIDMap = map[string]string{
+    "ARB,BASE": "37",
+    "ETH,OPT": "38",
+    "AVAX,ETH": "39",
+    "ETH,POLY": "40",
+    "AVAX,POLY": "41",
+    "BSC,ETH": "42",
     "ARB,ETH": "43",
+    "BASE,ETH": "44",
+    "BASE,OPT": "46",
+    "AVAX,BSC": "47",
+    "BSC,POLY": "48",
+    "OPT,POLY": "49",
+    "BASE,BSC": "50",
     "ETH,WEMIX": "51",
-    // Add more mappings as needed
+    "KROMA,WEMIX": "52",
+    "ARB,POLY": "53",
+    "ARB,BSC": "54",
+    "ARB,OPT": "55",
+    "ARB,AVAX": "56",
+    "AVAX,OPT": "57",
+    "BASE,POLY": "58",
+    "BSC,OPT": "59",
+    "AVAX,BASE": "60",
+    "BSC,WEMIX": "61",
+    "AVAX,WEMIX": "62",
+    "POLY,WEMIX": "63",
+    "ARB,WEMIX": "64",
+    "OPT,WEMIX": "65",
+    "ETH,GNO": "68",
+    "GNO,POLY": "69",
 }
 
 func getLaneID(net1, net2 string) (string, bool) {
@@ -48,7 +75,6 @@ var networkMappings = map[string]string{
     "KROMA": "Kroma Mainnet",
     "WEMIX": "WEMIX Mainnet",
     "GNO":   "GnosisChain Mainnet",
-    "POLYX": "Polygon zkEVM Mainnet",
     "OPT":   "Optimism Mainnet",
     "AVAX":  "Avalanche Mainnet",
     "POLY":  "Polygon Mainnet",
@@ -77,7 +103,6 @@ var networkIDMap = map[string]string{
     "WEMIX": "27",
     "KROMA": "28",
     "GNO": "30",
-    "POLYZ": "31",
 }
 
 func getNetworkID(networkName string) (string, bool) {

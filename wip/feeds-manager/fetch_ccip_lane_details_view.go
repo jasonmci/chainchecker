@@ -318,6 +318,5 @@ func FetchLaneDetails(sessionToken, laneID string ) []byte {
         fmt.Printf("Workflow Run ID: %s, Name: %s, Status: %s\n", workflow.ID, workflow.Name, workflow.Status)
     }
 
-    // Further details can be printed similarly
-	return responseBody
+    return responseBody
 }
