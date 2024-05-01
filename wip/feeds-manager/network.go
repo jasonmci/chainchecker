@@ -69,12 +69,11 @@ func getLaneID(net1, net2 string) (string, bool) {
     return id, found
 }
 
-
 // Network mappings from short name to full name
 var networkMappings = map[string]string{
     "KROMA": "Kroma Mainnet",
     "WEMIX": "WEMIX Mainnet",
-    "GNO":   "GnosisChain Mainnet",
+    "GNO":   "Gnosis Mainnet",
     "OPT":   "Optimism Mainnet",
     "AVAX":  "Avalanche Mainnet",
     "POLY":  "Polygon Mainnet",
@@ -82,6 +81,19 @@ var networkMappings = map[string]string{
     "ETH":   "Ethereum Mainnet",
     "ARB":   "Arbitrum Mainnet",
     "BASE":  "Base Mainnet",
+}
+
+var chainMappings = map[string]string{
+    "ethereum-mainnet-arbitrum-1":  "Arbitrum Mainnet",
+    "ethereum-mainnet-base-1":      "Base Mainnet",
+    "ethereum-mainnet-optimism-1":  "Optimism Mainnet",
+    "matic-mainnet":                "Polygon Mainnet",
+    "ethereum-mainnet":             "Ethereum Mainnet",
+    "avalanche-mainnet":            "Avalanche Mainnet",
+    "bsc-mainnet":                  "BSC Mainnet",
+    "ethereum-mainnet-kroma-1":     "Kroma Mainnet",
+    "wemix-mainnet":                "WEMIX Mainnet",
+    "xdai-mainnet":                 "Gnosis Mainnet",
 }
 
 // PrintNetworkMappings prints all network mappings from the map
@@ -109,30 +121,3 @@ func getNetworkID(networkName string) (string, bool) {
     id, found := networkIDMap[networkName]
     return id, found
 }
-
-
-// func fetchNetworkDetails(data *Data, networkName string) {
-//     found := false
-//     for _, chain := range data.CCIP.Chains {
-//         if chain.Network.Name == networkName {
-//             found = true
-//             fmt.Printf("Network Name: %s\n", chain.Network.Name)
-//             fmt.Printf("Explorer URL: %s\n", chain.Network.ExplorerURL)
-
-//             for _, contract := range chain.Contracts {
-//                 switch contract.Name {
-//                 case "Router":
-//                     fmt.Printf("Router Address: %s\n", contract.Address)
-//                 case "PriceRegistry":
-//                     fmt.Printf("PriceRegistry Address: %s\n", contract.Address)
-//                 case "ARMContract":
-//                     fmt.Printf("ARMContract Address: %s\n", contract.Address)
-//                 }
-//             }
-//             break
-//         }
-//     }
-//     if !found {
-//         fmt.Println("Network not found.")
-//     }
-// }

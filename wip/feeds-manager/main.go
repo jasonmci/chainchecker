@@ -1,151 +1,19 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 
+	"github.com/BurntSushi/toml"
 	"github.com/joho/godotenv"
 )
 
-// Define a struct to hold lane information
-type ChainInfo struct {
-    Network string
-    PaymentTokens []string
-    TransferTokens []string
-}
-
-type LaneInfo struct {
-    Network string
-    PaymentTokens []string
-    TransferTokens []string
-}
-
-
-func parseChainInfo(arg string) (ChainInfo, error) {
-    parts := strings.Split(arg, ",")
-    if len(parts) < 3 {
-        return ChainInfo{}, fmt.Errorf("incorrect format for lane argument. expecting 'network,paymentToken,transferToken'")
-    }
-
-    networkID, found := getNetworkID(parts[0])
-    if !found {
-        return ChainInfo{}, fmt.Errorf("network name %s not recognized", parts[0])
-    }
-
-    // laneID, found := getLaneID(parts[0], parts[1])
-    // if !found {
-    //     return ChainInfo{}, fmt.Errorf("no lane found for networks %s and %s", parts[0], parts[1])
-    // }
-
-    return ChainInfo{
-        Network: networkID, // Store the ID, not the name
-        PaymentTokens: parts[1:2],
-        TransferTokens: parts[2:],
-    }, nil
-}
-
-// func parseLaneInfo(arg string, laneB string) (LaneInfo, error) {
-//     parts := strings.Split(arg, ",")
-//     if len(parts) < 3 {
-//         return LaneInfo{}, fmt.Errorf("incorrect format for lane argument. expecting 'network1,network2,paymentToken,transferToken'")
-//     }
-
-//     laneID, found := getLaneID(parts[0], parts[1])
-//     if !found {
-//         return LaneInfo{}, fmt.Errorf("no lane found for networks %s and %s", parts[0], parts[1])
-//     }
-
-//     return LaneInfo{
-//         Network: laneID,
-//         PaymentTokens: parts[2:3],
-//         TransferTokens: parts[3:],
-//     }, nil
-// }
-
-
-func fetchDataForChain(chain ChainInfo) {
-
-    // fetch ccip chain response
-    //FetchChainDetails(chain.Network)
-
-    fmt.Printf("Network: %s\n", chain.Network)
-
-
-    fmt.Printf("Payment Tokens: %v\n", chain.PaymentTokens)
-    fmt.Printf("Transfer Tokens: %v\n", chain.TransferTokens)
-
-    // Network configs
-    // fetch arm address
-    fmt.Printf("Fetching ARM address for network: %s\n", chain.Network)
-
-    // fetch router address
-    fmt.Printf("Fetching Router address for network: %s\n", chain.Network)
-
-    // fetch Price Registry
-    fmt.Printf("Fetching Price Registry for network: %s\n", chain.Network)
-
-
-    // now we are going to fetch onramp offramp and commit stores
-    // fetch onramp
-    fmt.Printf("Fetching Onramp for network: %s\n", chain.Network)
-
-    // fetch offramp
-    fmt.Printf("Fetching Offramp for network: %s\n", chain.Network)
-
-    // fetch commit store
-    fmt.Printf("Fetching Commit Store for network: %s\n", chain.Network)
-
-    
-    // and now we need to fetch the fee tokens for fees and tokens to transfer
-
-    // // fetch fee tokens
-    // fmt.Printf("Fetching Fee Tokens for network: %s\n", chain.Network)
-
-    // // fetch tokens to transfer
-    // fmt.Printf("Fetching Tokens to Transfer for network: %s\n", chain.Network)
-
-    // // fetch token pool
-    // fmt.Printf("Fetching Token Pool for network: %s\n", chain.Network)
-
-        // Implement actual fetching logic here
-}
-
-
 func main() {
-
-    var a, b string
-    flag.StringVar(&a, "A", "", "Details for Lane A (network,paymentToken,transferToken)")
-    flag.StringVar(&b, "B", "", "Details for Lane B (network,paymentToken,transferToken)")
-    flag.Parse()
-
-    // laneA, err := parseChainInfo(a)
-    // if err != nil {
-    //     fmt.Println("Error:", err)
-    //     return
-    // }
-
-    // laneB, err := parseChainInfo(b)
-    // if err != nil {
-    //     fmt.Println("Error:", err)
-    //     return
-    // }
-
-    // Get the lane ID as a concatenation of the two network IDs
-    partsA := strings.Split(a, ",")
-    partsB := strings.Split(b, ",")
-
-    //use networkId map to get the chain ID
-    chainAId, _ := getNetworkID(partsA[0])
-    chainBId, _ := getNetworkID(partsB[0])
-
-
-    laneID, _ := getLaneID(partsA[0], partsB[0])
-
-    fmt.Printf("chain ID: %s, other chain ID: %s\n", partsA[0], partsB[0])
-    fmt.Printf("Lane ID: %s\n", laneID)
 
     // Load environment variables from .env file
     if err := godotenv.Load(); err != nil {
@@ -156,89 +24,169 @@ func main() {
     username    := os.Getenv("FEEDS_MANAGER_USERNAME")
     password    := os.Getenv("FEEDS_MANAGER_PASSWORD")
 
+    var a, b string
+    flag.StringVar(&a, "A", "", "Details for Lane A (network,paymentToken,transferToken)")
+    flag.StringVar(&b, "B", "", "Details for Lane B (network,paymentToken,transferToken)")
+    flag.Parse()
+
     // Setup command line flags
     //listNetworks := flag.Bool("list", false, "List all networks")
     //shortName := flag.String("network", "", "Short network name to fetch details for")
-    flag.Parse()
+    //flag.Parse()
+
+    // Get the lane ID as a concatenation of the two network IDs
+    partsA := strings.Split(a, ",")
+    partsB := strings.Split(b, ",")
+    laneID, _ := getLaneID(partsA[0], partsB[0])
+
+    //use networkId map to get the chain ID
+    chainAId, _ := getNetworkID(partsA[0])
+    chainBId, _ := getNetworkID(partsB[0])
+
+    fmt.Printf("chain ID: %s, other chain ID: %s\n", partsA[0], partsB[0])
+    fmt.Printf("Lane ID: %s\n", laneID)
+
 
     token, err := LoginUser(username, password)
     if err != nil {
         log.Fatalf("Login failed: %v", err)
     }
-    fmt.Println("Obtained token:", token)
     
-    //FetchSession(token)
-    //FetchProfileHook(token)
-    FetchChainDetails(token, chainAId)
-    FetchChainDetails(token, chainBId)
-    // viewResponseBody := FetchCCIPView(token)
+    chainA, _ := FetchChainDetails(token, chainAId)
+    chainB, _ := FetchChainDetails(token, chainBId)
 
-    FetchLaneDetails(token, laneID)
+    //lane, _ := FetchLaneDetails(token, laneID)
     
-
-    // chainAResponseBody := FetchChainDetails(token, "21")
-    // //chainBResponseBody := FetchChainDetails(token, "21")
-
-    // laneResponseBody := FetchLaneDetails(token, laneID)
-
-    // // print the non byte response of chainAResponseBody
-    // fmt.Println("Chain A Response:", chainAResponseBody)
-    // fmt.Println("Chain A Response:", string(laneResponseBody))
-
-    // if laneA.Network != "" {
-    //     fmt.Println("Fetching data for Lane A...")
-    //     fetchDataForChain(laneA)
-    // }
-
-    // if laneB.Network != "" {
-    //     fmt.Println("Fetching data for Lane B...")
-    //     fetchDataForChain(laneB)
-    // }
-
-
-    //chainBResponseBody := FetchChainDetails(token, "21")
-    //laneResponseBody := FetchLaneDetails(token, laneID)
-
-
-    //fmt.Println("Chain A Response:", chainAResponseBody)
-    //fmt.Println("Chain B Response:", chainBResponseBody)
-    //fmt.Println("Lane Response:", laneResponseBody)
-
-    // convert laneResponseBody to json
-
-
-    // var viewResponse CCIPViewResponse
-    // if err := json.Unmarshal(viewResponseBody, &viewResponse); err != nil {
-    //     log.Fatalf("Error parsing JSON: %v", err)
-    // }
+    //DeployedTemplateLane := lane.Data.CCIP.Lane.DeployedTemplate
+    DeployedTemplateA := chainA.Data.CCIP.Chain.DeployedTemplate
     
-    // // Example of using the data
-    // for _, chain := range viewResponse.Data.CCIP.Chains {
-    //     fmt.Printf("Chain ID: %s, Display Name: %s, Network: %s\n",
-    //         chain.ID, chain.DisplayName, chain.Network.Name)
-    // }
+    SupportedTokensA := chainA.Data.CCIP.Chain.SupportedTokens
+    SupportedTokensB := chainB.Data.CCIP.Chain.SupportedTokens
 
-    var chainResponse CCIPChainResponse
-    // if err := json.Unmarshal(chainResponseBody, &chainResponse); err != nil {
-    //     log.Fatalf("Error parsing JSON: %v", err)
-    // }
-    
-    fmt.Print("Chain Response: ", chainResponse.Data.CCIP.Chain.Network.ID)
-    // // Example of using the data
-    // for _, token := range chainResponse.Data.CCIP.Chain.SupportedTokens {
-    //     fmt.Printf("Chain ID: %s, Display Name: %s, Network: %s\n",
-    //         token.Address, token.Token, token.PriceType)
-    // }
+    DeployedTemplateB := chainB.Data.CCIP.Chain.DeployedTemplate
 
-    // var laneResponse CCIPLaneResponse
-    // if err := json.Unmarshal(laneResponseBody, &laneResponse); err != nil {
-    //     log.Fatalf("Error parsing JSON: %v", err)
-    // }
+    var chainAArm string
+    for address := range DeployedTemplateA.Arms {
+        chainAArm = address
+    }
+
+    var chainARouter string
+    for address := range DeployedTemplateA.Routers {
+        chainARouter = address
+    }
+
+    var chainAPriceRegistry string
+    for address := range DeployedTemplateA.PriceRegistries {
+        chainAPriceRegistry = address
+    }
+
+    var tokenALINK string
+    var tokenANative string
+
+    for _, token := range SupportedTokensA {
+        if token.Token == "LINK" {
+            tokenALINK = token.Address
+        }
+        if token.Token == "WETH" {
+            tokenANative = token.Address
+        }
+    }
+
+    var tokenBLINK string
+    var tokenBNative string
+
+    for _, token := range SupportedTokensB {
+        if token.Token == "LINK" {
+            tokenBLINK = token.Address
+        }
+    }
+
+    var chainBArm string
+    for address := range DeployedTemplateB.Arms {
+        chainBArm = address
+    }
+
+    var chainBRouter string
+    for address := range DeployedTemplateB.Routers {
+        chainBRouter = address
+    }
+
+    var chainBPriceRegistry string
+    for address := range DeployedTemplateB.PriceRegistries {
+        chainBPriceRegistry = address
+    }
+
+    laneConfig := TestConfig{
+        LaneConfigs: map[string]LaneConfig{
+            chainA.Data.CCIP.Chain.Network.Name : {
+                IsNativeFeeToken: true,
+                FeeToken: tokenALINK,
+                BridgeTokens: []string{""},
+                BridgeTokensPools: []string{""},
+                Arm: chainAArm,
+                Router: chainARouter,
+                PriceRegistry: chainAPriceRegistry,
+                WrappedNative: tokenANative,
+                SrcContracts: map[string]SrcContract{
+                    chainB.Data.CCIP.Chain.Network.Name: {OnRamp: "", DeployedAt: 11111111},
+                },
+                DestContracts: map[string]DestContract{
+                    chainB.Data.CCIP.Chain.Network.Name: {OffRamp: "", CommitStore: "", ReceiverDapp: ""},
+                },
+            },
+            chainB.Data.CCIP.Chain.Network.Name : {
+                IsNativeFeeToken: true,
+                FeeToken: tokenBLINK,
+                BridgeTokens: []string{""},
+                BridgeTokensPools: []string{""},
+                Arm: chainBArm,
+                Router: chainBRouter,
+                PriceRegistry: chainBPriceRegistry,
+                WrappedNative: tokenBNative,
+                SrcContracts: map[string]SrcContract{
+                    chainA.Data.CCIP.Chain.Network.Name: {OnRamp: "", DeployedAt: 11111111},
+                },
+                DestContracts: map[string]DestContract{
+                    chainA.Data.CCIP.Chain.Network.Name: {OffRamp: "", CommitStore: "", ReceiverDapp: ""},
+                },
+            },
+        },
+    }
+
+       
+        // Marshal the data into JSON
+        jsonData, err := json.MarshalIndent(laneConfig, "", "    ")
+        if err != nil {
+            fmt.Println("Error marshaling JSON: ", err)
+            return
+        }
     
-    // // Example of using the data
-    // for _, chain := range viewResponse.Data.CCIP.Chains {
-    //     fmt.Printf("Chain ID: %s, Display Name: %s, Network: %s\n",
-    //         chain.ID, chain.DisplayName, chain.Network.Name)
-    // }
+        // Print the JSON string
+        fmt.Println(string(jsonData))
+
+
+
+        // Marshal the data into JSON
+    jsonData, jsonErr := json.MarshalIndent(laneConfig, "", "    ")
+    if jsonErr != nil {
+        fmt.Println("Error marshaling JSON: ", jsonErr)
+        return
+    }
+    fmt.Println("JSON output:")
+    fmt.Println(string(jsonData))
+
+    // Marshal the same data into TOML using BurntSushi/toml
+    var tomlBuffer bytes.Buffer
+    if tomlErr := toml.NewEncoder(&tomlBuffer).Encode(laneConfig); tomlErr != nil {
+        fmt.Println("Error marshaling TOML: ", tomlErr)
+        return
+    }
+    fmt.Println("\nTOML output:")
+    fmt.Println(tomlBuffer.String())
+
+    // fmt.Println("Chain A Response:", myresp.Data.CCIP.Chain.DisplayName)
+
+    // fmt.Printf("Chain ID: %s, Display Name: %s, Network: %s, Chain Type: %s\n",
+    // myresp.Data.CCIP.Chain.ID, myresp.Data.CCIP.Chain.DisplayName, myresp.Data.CCIP.Chain.Network.Name, myresp.Data.CCIP.Chain.Network.ChainType)
 
 }

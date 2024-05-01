@@ -9,8 +9,6 @@ import (
 	"log"
 	"net/http"
 
-	//"fmt"
-	//"net/http"
 	"os"
 )
 
@@ -177,7 +175,7 @@ type RateLimiterConfig struct {
     Rate        string `json:"rate"`
 }
 
-func FetchChainDetails(sessionToken, chainID string) []byte {
+func FetchChainDetails(sessionToken, chainID string) (*CCIPChainResponse, error) {
     queryBytes, err := os.ReadFile("FetchCCIPChainDetailsView.graphql")
     if err != nil {
         log.Fatalf("Failed to read GraphQL file: %v", err)
@@ -222,7 +220,7 @@ func FetchChainDetails(sessionToken, chainID string) []byte {
     var response CCIPChainResponse
     err = json.Unmarshal(responseBody, &response)
     if err != nil {
-        log.Fatalf("Error parsing JSON response: %v", err)
+        return nil, fmt.Errorf("error parsing JSON response: %w", err)
     }
 
     // Print the chain contracts details
@@ -282,23 +280,10 @@ func FetchChainDetails(sessionToken, chainID string) []byte {
         fmt.Printf("Token Address: %s\n", token.TokenAddress)
         fmt.Printf("Type and Version: %s\n\n", token.TypeAndVersion)
     }
-    // Print the chain contracts details
-    // for _, contract := range response.Data.CCIP.Chain.Contracts {
-    //     fmt.Printf("Contract ID: %s, Name: %s, Token Symbol: %s, Address: %s, Tag %s, Semver %s\n", contract.ID, contract.Name, contract.Metadata.TokenSymbol, contract.Address, contract.Tag, contract.Semver)
-    // }
-
-    // for _, token := range response.Data.CCIP.Chain.SupportedTokens {
-    //     fmt.Printf("Token: %s, Address: %s, Price Type: %s, Token Pool Type: %s\n",
-    //     token.Token, token.Address, token.PriceType, token.TokenPoolType)
-    // }
 
     // print the chain network details
     fmt.Printf("Chain ID: %s, Display Name: %s, Network: %s, Chain Type: %s\n",
         response.Data.CCIP.Chain.ID, response.Data.CCIP.Chain.DisplayName, response.Data.CCIP.Chain.Network.Name, response.Data.CCIP.Chain.Network.ChainType)
 
-    //fmt.Printf("ARM Address %s\n", response.Data.CCIP.Chain.DeployedTemplate)
-
-    // arm contract details
-
-    return responseBody
+    return &response, nil
 }

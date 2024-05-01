@@ -32,7 +32,7 @@ type CCIPLaneResponse struct {
 }
 
 
-func FetchLaneDetails(sessionToken, laneID string ) []byte {
+func FetchLaneDetails(sessionToken, laneID string ) (*CCIPLaneResponse, error) {
 
 	queryBytes, err := os.ReadFile("FetchCCIPLaneDetailsView.graphql")
     if err != nil {
@@ -78,7 +78,7 @@ func FetchLaneDetails(sessionToken, laneID string ) []byte {
     var response CCIPLaneResponse
     err = json.Unmarshal(responseBody, &response)
     if err != nil {
-        log.Fatalf("Error parsing JSON response: %v", err)
+        return nil, fmt.Errorf("error parsing JSON response: %w", err)
     }
 
     //lane := response.CCIP.Lane.ID
@@ -101,5 +101,5 @@ func FetchLaneDetails(sessionToken, laneID string ) []byte {
 		fmt.Printf("On Ramp Address: %s\n\n", details.OnRampAddress)
 	}
 
-    return responseBody
+    return &response, nil
 }
