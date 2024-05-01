@@ -1,9 +1,5 @@
 package main
 
-import (
-
-)
-
 type TestConfig struct {
     LaneConfigs map[string]LaneConfig `json:"lane_configs"`
 }

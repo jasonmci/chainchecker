@@ -77,7 +77,7 @@ type CCIPViewResponse struct {
 // FetchCCIPView fetches CCIP related data using a GraphQL query
 func FetchCCIPView(sessionToken string) []byte {
     // Read the GraphQL query from the file
-    queryBytes, err := os.ReadFile("FetchCCIPView.graphql")
+    queryBytes, err := os.ReadFile("queries/FetchCCIPView.graphql")
     if err != nil {
         log.Fatalf("Failed to read GraphQL file: %v", err)
     }
@@ -138,9 +138,4 @@ func FetchCCIPView(sessionToken string) []byte {
     return responseBody
 }
 
-func setCommonHeaders(req *http.Request, sessionToken string) {
-    req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("Accept", "*/*")
-    req.Header.Set("X-Session-Token", sessionToken)
-}
 

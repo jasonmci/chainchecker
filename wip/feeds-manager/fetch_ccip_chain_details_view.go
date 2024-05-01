@@ -176,7 +176,7 @@ type RateLimiterConfig struct {
 }
 
 func FetchChainDetails(sessionToken, chainID string) (*CCIPChainResponse, error) {
-    queryBytes, err := os.ReadFile("FetchCCIPChainDetailsView.graphql")
+    queryBytes, err := os.ReadFile("queries/FetchCCIPChainDetailsView.graphql")
     if err != nil {
         log.Fatalf("Failed to read GraphQL file: %v", err)
     }
@@ -222,68 +222,6 @@ func FetchChainDetails(sessionToken, chainID string) (*CCIPChainResponse, error)
     if err != nil {
         return nil, fmt.Errorf("error parsing JSON response: %w", err)
     }
-
-    // Print the chain contracts details
-    for _, contract := range response.Data.CCIP.Chain.Contracts {
-        fmt.Printf("Contract ID: %s, Name: %s, Token Symbol: %s, Address: %s, Tag %s, Semver %s\n", contract.ID, contract.Name, contract.Metadata.TokenSymbol, contract.Address, contract.Tag, contract.Semver)
-    }
-    fmt.Println("--------------------------------------------------")
-
-    fmt.Println("ARMs:")
-    for address, arm := range response.Data.CCIP.Chain.DeployedTemplate.Arms {
-        fmt.Printf("ARM Address: %s\n", address)
-        fmt.Printf("Is Cursed: %t\n", arm.IsCursed)
-        fmt.Printf("Status: %s\n", arm.Status)
-        fmt.Printf("Type and Version: %s\n", arm.TypeAndVersion)
-        fmt.Printf("Bless Weight Threshold: %d\n", arm.Config.BlessWeightThreshold)
-        fmt.Printf("Curse Weight Threshold: %d\n\n", arm.Config.CurseWeightThreshold)
-    }
-
-    // print some text as a separator
-    fmt.Println("--------------------------------------------------")
-
-    // print out arms details
-    for _, armProxy := range response.Data.CCIP.Chain.DeployedTemplate.ArmProxies {
-        fmt.Println("ARM Address:", armProxy.Arm)
-        fmt.Println("Status:", armProxy.Status)
-        fmt.Println("Type and Version:", armProxy.TypeAndVersion)
-    }
-
-    fmt.Println("--------------------------------------------------")
-
-    // Iterate over the routers map
-    for address, router := range response.Data.CCIP.Chain.DeployedTemplate.Routers {
-        fmt.Printf("Router Address: %s\n", address)
-        fmt.Printf("Status: %s\n", router.Status)
-        fmt.Printf("Type and Version: %s\n\n", router.TypeAndVersion)
-    }
-
-    fmt.Println("--------------------------------------------------")
-
-    // Iterate over the price registries map
-    fmt.Println("Price Registries:")
-    for address, registry := range response.Data.CCIP.Chain.DeployedTemplate.PriceRegistries {
-        fmt.Printf("Registry Address: %s\n", address)
-        fmt.Printf("Fee Tokens: %v\n", registry.FeeTokens)
-        fmt.Printf("Price Updaters: %v\n", registry.PriceUpdaters)
-        fmt.Printf("Staleness Threshold: %d\n", registry.StalenessThreshold)
-        fmt.Printf("Status: %s\n", registry.Status)
-        fmt.Printf("Type and Version: %s\n\n", registry.TypeAndVersion)
-    }
-
-    fmt.Println("--------------------------------------------------")
-    // Iterate over the tokens map
-    fmt.Println("Tokens:")
-    for tokenName, token := range response.Data.CCIP.Chain.DeployedTemplate.Tokens {
-        fmt.Printf("Token Name: %s\n", tokenName)
-        fmt.Printf("Pool Address: %s\n", token.PoolAddress)
-        fmt.Printf("Token Address: %s\n", token.TokenAddress)
-        fmt.Printf("Type and Version: %s\n\n", token.TypeAndVersion)
-    }
-
-    // print the chain network details
-    fmt.Printf("Chain ID: %s, Display Name: %s, Network: %s, Chain Type: %s\n",
-        response.Data.CCIP.Chain.ID, response.Data.CCIP.Chain.DisplayName, response.Data.CCIP.Chain.Network.Name, response.Data.CCIP.Chain.Network.ChainType)
 
     return &response, nil
 }

@@ -13,7 +13,7 @@ import (
 // LoginUser performs the login and returns the token
 func LoginUser(username, password string) (string, error) {
     // Construct the payload
-    query, err := os.ReadFile("LoginMutation.graphql")
+    query, err := os.ReadFile("queries/LoginMutation.graphql")
     if err != nil {
         log.Fatalf("Failed to read query file: %v", err)
     }

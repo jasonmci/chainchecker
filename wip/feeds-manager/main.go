@@ -6,12 +6,19 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
 	"github.com/BurntSushi/toml"
 	"github.com/joho/godotenv"
 )
+
+func setCommonHeaders(req *http.Request, sessionToken string) {
+    req.Header.Set("Content-Type", "application/json")
+    req.Header.Set("Accept", "*/*")
+    req.Header.Set("X-Session-Token", sessionToken)
+}
 
 func main() {
 

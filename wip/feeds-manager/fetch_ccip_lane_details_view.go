@@ -4,10 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-
-	//"fmt"
-
-	//"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -31,10 +27,9 @@ type CCIPLaneResponse struct {
 	} `json:"data"`
 }
 
-
 func FetchLaneDetails(sessionToken, laneID string ) (*CCIPLaneResponse, error) {
 
-	queryBytes, err := os.ReadFile("FetchCCIPLaneDetailsView.graphql")
+	queryBytes, err := os.ReadFile("queries/FetchCCIPLaneDetailsView.graphql")
     if err != nil {
         log.Fatalf("Failed to read GraphQL file: %v", err)
     }
@@ -80,26 +75,6 @@ func FetchLaneDetails(sessionToken, laneID string ) (*CCIPLaneResponse, error) {
     if err != nil {
         return nil, fmt.Errorf("error parsing JSON response: %w", err)
     }
-
-    //lane := response.CCIP.Lane.ID
-    fmt.Printf("Lane ID: %s, Status: %s\n", response.Data.CCIP.Lane.ID, response.Data.CCIP.Lane.Status)
-
-    // Example of printing details for legA
-    // fmt.Printf("Leg A ID: %s, Status: %s\n", lane.LegA.ID, lane.LegA.Status)
-    // for _, workflow := range lane.LegA.WorkflowRuns {
-    //     fmt.Printf("Workflow Run ID: %s, Name: %s, Status: %s\n", workflow.ID, workflow.Name, workflow.Status)
-    // }
-
-	fmt.Printf("Display Name: %s\n", response.Data.CCIP.Lane.DisplayName)
-
-	
-	// Iterate over deployed templates
-	for templateName, details := range response.Data.CCIP.Lane.DeployedTemplate {
-		fmt.Printf("Template Name: %s\n", templateName)
-		fmt.Printf("Commit Store Address: %s\n", details.CommitStoreAddress)
-		fmt.Printf("Off Ramp Address: %s\n", details.OffRampAddress)
-		fmt.Printf("On Ramp Address: %s\n\n", details.OnRampAddress)
-	}
 
     return &response, nil
 }
