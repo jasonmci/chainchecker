@@ -30,17 +30,17 @@ func main() {
     // Get the username and password from environment variables
     username    := os.Getenv("FEEDS_MANAGER_USERNAME")
     password    := os.Getenv("FEEDS_MANAGER_PASSWORD")
-
+    
     var a, b string
     flag.StringVar(&a, "A", "", "Details for Lane A (network,paymentToken,transferToken)")
     flag.StringVar(&b, "B", "", "Details for Lane B (network,paymentToken,transferToken)")
     flag.Parse()
-
-    // Setup command line flags
-    //listNetworks := flag.Bool("list", false, "List all networks")
-    //shortName := flag.String("network", "", "Short network name to fetch details for")
-    //flag.Parse()
-
+    
+    token, err := LoginUser(username, password)
+    if err != nil {
+        log.Fatalf("Login failed: %v", err)
+    }
+    
     // Get the lane ID as a concatenation of the two network IDs
     partsA := strings.Split(a, ",")
     partsB := strings.Split(b, ",")
@@ -50,26 +50,39 @@ func main() {
     chainAId, _ := getNetworkID(partsA[0])
     chainBId, _ := getNetworkID(partsB[0])
 
-    fmt.Printf("chain ID: %s, other chain ID: %s\n", partsA[0], partsB[0])
-    fmt.Printf("Lane ID: %s\n", laneID)
-
-
-    token, err := LoginUser(username, password)
-    if err != nil {
-        log.Fatalf("Login failed: %v", err)
-    }
-    
+    // Fetch the chain details
     chainA, _ := FetchChainDetails(token, chainAId)
     chainB, _ := FetchChainDetails(token, chainBId)
+    lane, _ := FetchLaneDetails(token, laneID)
 
-    //lane, _ := FetchLaneDetails(token, laneID)
+    // create a TokenStore to hold the token details
+    tokenStore := TokenStore{}
+    populateConfigFromResponse(*chainA, &tokenStore)
+    populateConfigFromResponse(*chainB, &tokenStore)
     
+	// Displaying updated configuration
+	for _, chain := range tokenStore.Chains {
+		fmt.Println("Chain:", chain.Name)
+		for _, token := range chain.Tokens {
+			fmt.Printf("  Token: %s, Address: %s, PoolAddress: %s, Is Fee Token: %v\n", token.Name, token.Address, token.PoolAddress, token.IsFeeToken)
+		}
+	}
+
+    feeTokenA, _  := tokenStore.GetTokenDetails(partsA[0], partsA[1])
+    feeTokenB, _  := tokenStore.GetTokenDetails(partsB[0], partsB[1])
+    txTokenA, _   := tokenStore.GetTokenDetails(partsA[0], partsA[2])
+    txTokenB, _   := tokenStore.GetTokenDetails(partsB[0], partsB[2])
+
+
+    fmt.Printf("Token Address: %s, Pool Address %s\n", feeTokenA.Address, feeTokenA.PoolAddress)
+    fmt.Printf("Token Address: %s, Pool Address %s\n", feeTokenB.Address, feeTokenB.PoolAddress)
+    fmt.Printf("Token Address: %s, Pool Address %s\n", txTokenA.Address, txTokenA.PoolAddress)
+    fmt.Printf("Token Address: %s, Pool Address %s\n", txTokenB.Address, txTokenB.PoolAddress)
+
+    fmt.Printf("New stuff Lane ID: %s, Display Name: %s, Status: %s\n", lane.Data.CCIP.Lane.ID, lane.Data.CCIP.Lane.DisplayName, lane.Data.CCIP.Lane.Status)
+
     //DeployedTemplateLane := lane.Data.CCIP.Lane.DeployedTemplate
     DeployedTemplateA := chainA.Data.CCIP.Chain.DeployedTemplate
-    
-    SupportedTokensA := chainA.Data.CCIP.Chain.SupportedTokens
-    SupportedTokensB := chainB.Data.CCIP.Chain.SupportedTokens
-
     DeployedTemplateB := chainB.Data.CCIP.Chain.DeployedTemplate
 
     var chainAArm string
@@ -85,27 +98,6 @@ func main() {
     var chainAPriceRegistry string
     for address := range DeployedTemplateA.PriceRegistries {
         chainAPriceRegistry = address
-    }
-
-    var tokenALINK string
-    var tokenANative string
-
-    for _, token := range SupportedTokensA {
-        if token.Token == "LINK" {
-            tokenALINK = token.Address
-        }
-        if token.Token == "WETH" {
-            tokenANative = token.Address
-        }
-    }
-
-    var tokenBLINK string
-    var tokenBNative string
-
-    for _, token := range SupportedTokensB {
-        if token.Token == "LINK" {
-            tokenBLINK = token.Address
-        }
     }
 
     var chainBArm string
@@ -127,13 +119,13 @@ func main() {
         LaneConfigs: map[string]LaneConfig{
             chainA.Data.CCIP.Chain.Network.Name : {
                 IsNativeFeeToken: true,
-                FeeToken: tokenALINK,
-                BridgeTokens: []string{""},
-                BridgeTokensPools: []string{""},
+                FeeToken: feeTokenA.Address,
+                BridgeTokens: []string{txTokenA.Address},
+                BridgeTokensPools: []string{txTokenA.PoolAddress},
                 Arm: chainAArm,
                 Router: chainARouter,
                 PriceRegistry: chainAPriceRegistry,
-                WrappedNative: tokenANative,
+                WrappedNative: feeTokenA.Address,
                 SrcContracts: map[string]SrcContract{
                     chainB.Data.CCIP.Chain.Network.Name: {OnRamp: "", DeployedAt: 11111111},
                 },
@@ -143,13 +135,13 @@ func main() {
             },
             chainB.Data.CCIP.Chain.Network.Name : {
                 IsNativeFeeToken: true,
-                FeeToken: tokenBLINK,
-                BridgeTokens: []string{""},
-                BridgeTokensPools: []string{""},
+                FeeToken: feeTokenB.Address,
+                BridgeTokens: []string{txTokenB.Address},
+                BridgeTokensPools: []string{txTokenB.PoolAddress},
                 Arm: chainBArm,
                 Router: chainBRouter,
                 PriceRegistry: chainBPriceRegistry,
-                WrappedNative: tokenBNative,
+                WrappedNative: feeTokenB.Address,
                 SrcContracts: map[string]SrcContract{
                     chainA.Data.CCIP.Chain.Network.Name: {OnRamp: "", DeployedAt: 11111111},
                 },
@@ -160,9 +152,28 @@ func main() {
         },
     }
 
-       
-        // Marshal the data into JSON
-        jsonData, err := json.MarshalIndent(laneConfig, "", "    ")
+    // Update the OnRamp for ChainB under ChainA's SrcContracts
+    laneConfig.LaneConfigs[chainA.Data.CCIP.Chain.Network.Name ].SrcContracts[chainB.Data.CCIP.Chain.Network.Name ] = SrcContract{
+        OnRamp:     "newOnRampAddress",
+        DeployedAt: 11111111,
+    }
+        // } else {
+        //     fmt.Println("ChainA configuration not found.")
+        // }
+
+    // the following are some examples of changing the laneConfig data
+    // change IsNativeFeeToken to false
+    laneConfig.LaneConfigs[chainA.Data.CCIP.Chain.Network.Name] = LaneConfig{
+        IsNativeFeeToken: false,
+    }
+
+    // add a third lane
+    laneConfig.LaneConfigs["third"] = LaneConfig{
+        IsNativeFeeToken: true,
+    }
+
+    // Marshal the data into JSON
+    jsonData, err := json.MarshalIndent(laneConfig, "", "    ")
         if err != nil {
             fmt.Println("Error marshaling JSON: ", err)
             return
@@ -170,8 +181,6 @@ func main() {
     
         // Print the JSON string
         fmt.Println(string(jsonData))
-
-
 
         // Marshal the data into JSON
     jsonData, jsonErr := json.MarshalIndent(laneConfig, "", "    ")
@@ -190,10 +199,5 @@ func main() {
     }
     fmt.Println("\nTOML output:")
     fmt.Println(tomlBuffer.String())
-
-    // fmt.Println("Chain A Response:", myresp.Data.CCIP.Chain.DisplayName)
-
-    // fmt.Printf("Chain ID: %s, Display Name: %s, Network: %s, Chain Type: %s\n",
-    // myresp.Data.CCIP.Chain.ID, myresp.Data.CCIP.Chain.DisplayName, myresp.Data.CCIP.Chain.Network.Name, myresp.Data.CCIP.Chain.Network.ChainType)
 
 }

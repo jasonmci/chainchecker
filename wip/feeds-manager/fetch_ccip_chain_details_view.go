@@ -141,15 +141,6 @@ type Arm struct {
 type Config struct {
     //BlessWeightThreshold int       `json:"blessWeightThreshold"`
     CurseWeightThreshold int       `json:"curseWeightThreshold"`
-    Voters               []Voter   `json:"voters"`
-}
-
-type Voter struct {
-    BlessVoteAddr    string `json:"blessVoteAddr"`
-    BlessWeight      int    `json:"blessWeight"`
-    CurseUnvoteAddr  string `json:"curseUnvoteAddr"`
-    CurseVoteAddr    string `json:"curseVoteAddr"`
-    CurseWeight      int    `json:"curseWeight"`
 }
 
 type Metadata struct {
