@@ -22,6 +22,10 @@ var networkNameMapping = map[string]string{
 
 	// testnet mappings
 	"polygon-testnet-mumbai": "POLY_TEST",
+	"ethereum-testnet-sepolia-arbitrum-1": "ARBSEP",
+	"ethereum-testnet-sepolia": "SEP",
+	"ethereum-testnet-sepolia-optimism-1": "OPTSEP",
+
 	// Add more reversed mappings here
 }
 
@@ -63,12 +67,6 @@ func main() {
 
 	if len(response.Data.AllCcipMessages.Nodes) > 0 {
 		node := response.Data.AllCcipMessages.Nodes[0]
-		// fmt.Printf("%-24s %s\n", "SendTimestamp:", node.SendTimestamp)
-		// fmt.Printf("%-24s %s\n", "SendFinalized:", node.SendFinalized)
-		// fmt.Printf("%-24s %s\n", "CommitBlockTimestamp:", node.CommitBlockTimestamp)
-		// fmt.Printf("%-24s %s\n", "BlessBlockTimestamp:", node.BlessBlockTimestamp)
-		// fmt.Printf("%-24s %s\n", "ReceiptTimestamp:", node.ReceiptTimestamp)
-		// fmt.Printf("%-24s %s\n", "ReceiptFinalized:", node.ReceiptFinalized)
 
 		layout := "2006-01-02T15:04:05"
 		sendTime, _ := time.Parse(layout, node.SendTimestamp)

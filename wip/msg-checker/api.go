@@ -88,7 +88,7 @@ type Info struct {
 }
 
 func GenerateMessageQueryString(messageId string ) string {
-	baseURL := "https://ccip.chain.link/api/query"
+	baseURL := "https://ccip.chain.link/api/query/MESSAGE_DETAILS_QUERY"
 	queryParams := url.Values{}
 	//queryParams.Add("query", "MESSAGE_DETAILS_QUERY")
 
