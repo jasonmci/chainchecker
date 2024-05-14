@@ -73,10 +73,3 @@ func (tokenStore *TokenStore) GetTokenDetails(shortChainName, tokenName string) 
 	}
 	return Token{}, false
 }
-
-// for _, chain := range tokenStore.Chains {
-// 	fmt.Println("Chain:", chain.Name)
-// 	for _, token := range chain.Tokens {
-// 		fmt.Printf("  Token: %s, Address: %s, PoolAddress: %s, Is Fee Token: %v\n", token.Name, token.Address, token.PoolAddress, token.IsFeeToken)
-// 	}
-// }

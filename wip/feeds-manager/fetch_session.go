@@ -3,12 +3,18 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	//"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 )
+
+func setCommonHeaders(req *http.Request, sessionToken string) {
+    req.Header.Set("Content-Type", "application/json")
+    req.Header.Set("Accept", "*/*")
+    req.Header.Set("X-Session-Token", sessionToken)
+}
+
 
 // FetchSessionInfo fetches the session information using the GraphQL query
 func FetchSession(sessionToken string) string {
@@ -29,13 +35,13 @@ func FetchSession(sessionToken string) string {
     if err != nil {
         log.Fatalf("Error marshaling payload: %v", err)
     }
-
+    
     // Create a new HTTP request
-    req, err := http.NewRequest("POST", "https://gql.feeds-manager.main.prod.cldev.sh/query", bytes.NewReader(payloadBytes))
+    req, err := http.NewRequest("POST", GqlEndpoint, bytes.NewReader(payloadBytes))
     if err != nil {
         log.Fatalf("Error creating request: %v", err)
     }
-
+    
     setCommonHeaders(req, sessionToken)
 
     // Send the request
@@ -51,6 +57,5 @@ func FetchSession(sessionToken string) string {
     if err != nil {
         log.Fatalf("Error reading response body: %v", err)
     }
-
 	return string(responseBody)
 }

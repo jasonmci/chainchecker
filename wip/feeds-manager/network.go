@@ -24,56 +24,12 @@ type Network struct {
     ChainType     string `json:"chainType"`
 }
 
-func normalizePair(net1, net2 string) (string, string) {
-    networks := []string{net1, net2}
-    sort.Strings(networks)  // Sorts the slice in ascending order.
-    return networks[0], networks[1]
-}
-
-var laneIDMap = map[string]string{
-    "ARB,BASE": "37",
-    "ETH,OPT": "38",
-    "AVAX,ETH": "39",
-    "ETH,POLY": "40",
-    "AVAX,POLY": "41",
-    "BSC,ETH": "42",
-    "ARB,ETH": "43",
-    "BASE,ETH": "44",
-    "BASE,OPT": "46",
-    "AVAX,BSC": "47",
-    "BSC,POLY": "48",
-    "OPT,POLY": "49",
-    "BASE,BSC": "50",
-    "ETH,WEMIX": "51",
-    "KROMA,WEMIX": "52",
-    "ARB,POLY": "53",
-    "ARB,BSC": "54",
-    "ARB,OPT": "55",
-    "ARB,AVAX": "56",
-    "AVAX,OPT": "57",
-    "BASE,POLY": "58",
-    "BSC,OPT": "59",
-    "AVAX,BASE": "60",
-    "BSC,WEMIX": "61",
-    "AVAX,WEMIX": "62",
-    "POLY,WEMIX": "63",
-    "ARB,WEMIX": "64",
-    "OPT,WEMIX": "65",
-    "ETH,GNO": "68",
-    "GNO,POLY": "69",
-}
-
-func getLaneID(net1, net2 string) (string, bool) {
-    net1, net2 = normalizePair(net1, net2)
-    id, found := laneIDMap[net1+","+net2]
-    return id, found
-}
 
 // Network mappings from short name to full name
 var networkMappings = map[string]string{
     "KROMA": "Kroma Mainnet",
-    "WEMIX": "WEMIX Mainnet",
-    "GNO":   "Gnosis Mainnet",
+    "WEMIX": "WeMix Mainnet",
+    "GNO":   "GnosisChain Mainnet",
     "OPT":   "Optimism Mainnet",
     "AVAX":  "Avalanche Mainnet",
     "POLY":  "Polygon Mainnet",
@@ -92,16 +48,8 @@ var chainMappings = map[string]string{
     "avalanche-mainnet":            "Avalanche Mainnet",
     "bsc-mainnet":                  "BSC Mainnet",
     "ethereum-mainnet-kroma-1":     "Kroma Mainnet",
-    "wemix-mainnet":                "WEMIX Mainnet",
-    "xdai-mainnet":                 "Gnosis Mainnet",
-}
-
-// PrintNetworkMappings prints all network mappings from the map
-func PrintNetworkMappings() {
-    fmt.Println("Network Mappings:")
-    for shortName, fullName := range networkMappings {
-        fmt.Printf("%-10s%s\n", shortName, fullName)
-    }
+    "wemix-mainnet":                "WeMix Mainnet",
+    "xdai-mainnet":                 "GnosisChain Mainnet",
 }
 
 var networkIDMap = map[string]string{
@@ -117,7 +65,41 @@ var networkIDMap = map[string]string{
     "GNO": "30",
 }
 
+// map friendly network name to its native fee token address
+var nativeFeeTokenMap = map[string]string{
+    "Optimism Mainnet": "0x4200000000000000000000000000000000000006",
+    "Avalanche Mainnet": "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
+    "Polygon Mainnet": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+    "Ethereum Mainnet": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "BSC Mainnet": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+    "Arbitrum Mainnet": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+    "Base Mainnet": "0x4200000000000000000000000000000000000006",
+    "WeMix Mainnet": "0x7D72b22a74A216Af4a002a1095C8C707d6eC1C5f",
+    "Kroma Mainnet": "0x4200000000000000000000000000000000000001",
+    "GnosisChain Mainnet": "0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d",
+}
+
+// PrintNetworkMappings prints all network mappings from the map
+func PrintNetworkMappings() {
+    fmt.Println("Network Mappings:")
+    for shortName, fullName := range networkMappings {
+        fmt.Printf("%-10s%s\n", shortName, fullName)
+    }
+}
+
 func getNetworkID(networkName string) (string, bool) {
     id, found := networkIDMap[networkName]
+    return id, found
+}
+
+func normalizePair(net1, net2 string) (string, string) {
+    networks := []string{net1, net2}
+    sort.Strings(networks)  // Sorts the slice in ascending order.
+    return networks[0], networks[1]
+}
+
+func getLaneID(net1, net2 string) (string, bool) {
+    net1, net2 = normalizePair(net1, net2)
+    id, found := laneIDMap[net1+","+net2]
     return id, found
 }

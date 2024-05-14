@@ -28,9 +28,8 @@ func LoginUser(username, password string) (string, error) {
         "query": string(query),
     }
     
-    gqlEndpoint := os.Getenv("FEEDS_MANAGER_ENDPOINT")
     payloadBytes, _ := json.Marshal(payload)
-    req, _ := http.NewRequest("POST", gqlEndpoint, bytes.NewReader(payloadBytes))
+    req, _ := http.NewRequest("POST", GqlEndpoint, bytes.NewReader(payloadBytes))
     req.Header.Set("Content-Type", "application/json")
 
     client := &http.Client{}

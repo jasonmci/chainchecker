@@ -73,9 +73,8 @@ type CCIPViewResponse struct {
     } `json:"data"`
 }
 
-
 // FetchCCIPView fetches CCIP related data using a GraphQL query
-func FetchCCIPView(sessionToken string) []byte {
+func FetchCCIPView(sessionToken string) (*CCIPViewResponse, error) {
     // Read the GraphQL query from the file
     queryBytes, err := os.ReadFile("queries/FetchCCIPView.graphql")
     if err != nil {
@@ -95,7 +94,7 @@ func FetchCCIPView(sessionToken string) []byte {
     }
 
     // Create and set up the HTTP request
-    req, err := http.NewRequest("POST", "https://gql.feeds-manager.main.prod.cldev.sh/query", bytes.NewReader(payloadBytes))
+    req, err := http.NewRequest("POST", GqlEndpoint, bytes.NewReader(payloadBytes))
     if err != nil {
         log.Fatalf("Error creating request: %v", err)
     }
@@ -121,21 +120,75 @@ func FetchCCIPView(sessionToken string) []byte {
     if err != nil {
         log.Fatalf("Error parsing JSON response: %v", err)
     }
+    return &response, nil
+}
 
-    // Print Chains
+func PrintChains(chains []struct {
+    ID          string `json:"id"`
+    DisplayName string `json:"displayName"`
+    Network     struct {
+        ID          string `json:"id"`
+        Name        string `json:"name"`
+        IconName    string `json:"iconName"`
+        ExplorerURL string `json:"explorerURL"`
+        ChainID     string `json:"chainID"`
+        ChainType   string `json:"chainType"`
+        Typename    string `json:"__typename"`
+    } `json:"network"`
+    Contracts []struct {
+        ID                    string `json:"id"`
+        Name                  string `json:"name"`
+        Address               string `json:"address"`
+        Tag                   string `json:"tag"`
+        TransferOwnershipStatus string `json:"transferOwnershipStatus"`
+        Typename              string `json:"__typename"`
+    } `json:"contracts"`
+    Typename string `json:"__typename"`
+}) {
     fmt.Println("Chains:")
-    for _, chain := range response.Data.CCIP.Chains {
+    for _, chain := range chains {
         fmt.Printf("Chain ID: %s, Network Name: %s, Chain Type: %s\n", chain.ID, chain.Network.Name, chain.Network.ChainType)
     }
+}
 
-    
-    // Print Lanes
+// PrintLanes prints all lanes from the response
+func PrintLanes(lanes []struct {
+    ID          string `json:"id"`
+    DisplayName string `json:"displayName"`
+    Status      string `json:"status"`
+    ChainA      struct {
+        ID          string `json:"id"`
+        DisplayName string `json:"displayName"`
+        Network     struct {
+            ID          string `json:"id"`
+            Name        string `json:"name"`
+            IconName    string `json:"iconName"`
+            ExplorerURL string `json:"explorerURL"`
+            ChainID     string `json:"chainID"`
+            ChainType   string `json:"chainType"`
+            Typename    string `json:"__typename"`
+        } `json:"network"`
+        Typename string `json:"__typename"`
+    } `json:"chainA"`
+    ChainB struct {
+        ID          string `json:"id"`
+        DisplayName string `json:"displayName"`
+        Network     struct {
+            ID          string `json:"id"`
+            Name        string `json:"name"`
+            IconName    string `json:"iconName"`
+            ExplorerURL string `json:"explorerURL"`
+            ChainID     string `json:"chainID"`
+            ChainType   string `json:"chainType"`
+            Typename    string `json:"__typename"`
+        } `json:"network"`
+        Typename string `json:"__typename"`
+    } `json:"chainB"`
+    Typename string `json:"__typename"`
+}) {
     fmt.Println("Lanes:")
-    for _, lane := range response.Data.CCIP.Lanes {
+    for _, lane := range lanes {
         fmt.Printf("Lane ID: %s, Status: %s, Chain A: %s (%s), Chain B: %s (%s)\n",
             lane.ID, lane.Status, lane.ChainA.Network.Name, lane.ChainA.Network.ChainType, lane.ChainB.Network.Name, lane.ChainB.Network.ChainType)
     }
-    return responseBody
 }
-
-

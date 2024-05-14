@@ -49,7 +49,7 @@ func FetchLaneDetails(sessionToken, laneID string ) (*CCIPLaneResponse, error) {
     }
 
     // Create and set up the HTTP request
-    req, err := http.NewRequest("POST", "https://gql.feeds-manager.main.prod.cldev.sh/query", bytes.NewReader(payloadBytes))
+    req, err := http.NewRequest("POST", GqlEndpoint, bytes.NewReader(payloadBytes))
     if err != nil {
         log.Fatalf("Error creating request: %v", err)
     }
@@ -78,3 +78,5 @@ func FetchLaneDetails(sessionToken, laneID string ) (*CCIPLaneResponse, error) {
 
     return &response, nil
 }
+
+
