@@ -15,7 +15,7 @@ func init() {
 	if err := godotenv.Load(); err != nil {
         panic("Error loading .env file")
     }
-    GqlEndpoint = os.Getenv("FEEDS_MANAGER_ENDPOINT")
-	Username = os.Getenv("FEEDS_MANAGER_USERNAME")
-	Password = os.Getenv("FEEDS_MANAGER_PASSWORD")
+    GqlEndpoint = os.Getenv("CLO_ENDPOINT")
+	Username = os.Getenv("CLO_USERNAME")
+	Password = os.Getenv("CLO_PASSWORD")
 }

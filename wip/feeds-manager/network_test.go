@@ -49,6 +49,7 @@ func contains(s, substr string) bool {
 
 // TestGetNetworkID checks if getNetworkID returns the correct ID and found status for various network names.
 func TestGetNetworkID(t *testing.T) {
+	genConfig := loadGeneratorConfig()
 	tests := []struct {
 		networkName string
 		expectedID  string
@@ -60,7 +61,7 @@ func TestGetNetworkID(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		id, found := getNetworkID(test.networkName)
+		id, found := getNetworkID(genConfig, test.networkName)
 		if id != test.expectedID || found != test.expectedFound {
 			t.Errorf("getNetworkID(%q) = %q, %v; want %q, %v", test.networkName, id, found, test.expectedID, test.expectedFound)
 		}
@@ -88,6 +89,7 @@ func TestNormalizePair(t *testing.T) {
 
 // TestGetLaneID checks if getLaneID returns the correct lane ID and found status for various network pairs.
 func TestGetLaneID(t *testing.T) {
+	genConfig := loadGeneratorConfig()
 	tests := []struct {
 		net1, net2 string
 		expectedID string
@@ -99,9 +101,35 @@ func TestGetLaneID(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		id, found := getLaneID(test.net1, test.net2)
+		id, found := getLaneID(genConfig, test.net1, test.net2)
 		if id != test.expectedID || found != test.expectedFound {
 			t.Errorf("getLaneID(%q, %q) = %q, %v; want %q, %v", test.net1, test.net2, id, found, test.expectedID, test.expectedFound)
+		}
+	}
+}
+
+func TestGetChainMapping(t *testing.T) {
+	genConfig := loadGeneratorConfig()
+	tests := []struct {
+		networkName string
+		expectedChain string
+	}{
+		{"ethereum-mainnet-arbitrum-1", "Arbitrum Mainnet"},
+		{"ethereum-mainnet-base-1", "Base Mainnet"},
+		{"ethereum-mainnet-optimism-1", "Optimism Mainnet"},
+		{"matic-mainnet", "Polygon Mainnet"},
+		{"ethereum-mainnet", "Ethereum Mainnet"},
+		{"avalanche-mainnet", "Avalanche Mainnet"},
+		{"bsc-mainnet", "BSC Mainnet"},
+		{"ethereum-mainnet-kroma-1", "Kroma Mainnet"},
+		{"wemix-mainnet", "WeMix Mainnet"},
+		{"xdai-mainnet", "GnosisChain Mainnet"},
+	}
+
+	for _, test := range tests {
+		chain, _ := getChainMapping(genConfig, test.networkName)
+		if chain != test.expectedChain  {
+			t.Errorf("getChainMapping(%q) = %q; want %q", test.networkName, chain, test.expectedChain)
 		}
 	}
 }

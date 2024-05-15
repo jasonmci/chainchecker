@@ -12,22 +12,11 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-var (
-    a, b string
-    printChains bool
-    printLanes  bool
-)
-
-func init() {
-    flag.StringVar(&a, "A", "", "Details for Lane A (network,paymentToken,transferToken)")
-    flag.StringVar(&b, "B", "", "Details for Lane B (network,paymentToken,transferToken)")
-    flag.BoolVar(&printChains, "c", false, "Print chains")
-    flag.BoolVar(&printLanes, "l", false, "Print lanes")
-    flag.Parse()
-}
-
 func main() {
-    
+
+    flag.Parse()
+    genConfig := loadGeneratorConfig()
+
     sessionToken, err := LoginUser(Username, Password)
     if err != nil {
         log.Fatalf("Login failed: %v", err)
@@ -37,7 +26,7 @@ func main() {
     if err != nil {
         log.Fatalf("Failed to fetch CCIP view: %v", err)
     }
-    
+
     // Check if we need to print chains
     if printChains {
         PrintChains(response.Data.CCIP.Chains)
@@ -48,18 +37,30 @@ func main() {
         PrintLanes(response.Data.CCIP.Lanes)
     }
 
+    if a == "" || b == "" {
+        return
+    }
+
     // Get the lane ID as a concatenation of the two network IDs
     partsA := strings.Split(a, ",")
     partsB := strings.Split(b, ",")
-    laneID, _ := getLaneID(partsA[0], partsB[0])
+    laneID, _ := getLaneID(genConfig, partsA[0], partsB[0])
 
     //use networkId map to get the chain ID
-    chainAId, _ := getNetworkID(partsA[0])
-    chainBId, _ := getNetworkID(partsB[0])
+    chainAId, _ := getNetworkID(genConfig, partsA[0])
+    chainBId, _ := getNetworkID(genConfig, partsB[0])
 
     // Fetch the chain details
     chainA, _   := FetchChainDetails(sessionToken, chainAId)
     chainB, _   := FetchChainDetails(sessionToken, chainBId)
+
+    // CLO Has it as WEMIX Mainnet, but the test framework expects WeMix Mainnet`
+    if chainA.Data.CCIP.Chain.Network.Name == "WEMIX Mainnet" {
+        chainA.Data.CCIP.Chain.Network.Name = "WeMix Mainnet"
+    }
+    if chainB.Data.CCIP.Chain.Network.Name == "WEMIX Mainnet" {
+        chainB.Data.CCIP.Chain.Network.Name = "WeMix Mainnet"
+    }
 
     lane, _     := FetchLaneDetails(sessionToken, laneID)
 
@@ -76,7 +77,7 @@ func main() {
     testConfig := TestConfig{
         LaneConfigs: make(map[string]LaneConfig),
     }
-
+   
     DeployedTemplateA := chainA.Data.CCIP.Chain.DeployedTemplate
     DeployedTemplateB := chainA.Data.CCIP.Chain.DeployedTemplate
     
@@ -128,8 +129,20 @@ func main() {
 		networks := strings.Split(templateKey, "__")
 
         // separator
-        friendlyAName := chainMappings[networks[0]]
-        friendlyBName := chainMappings[networks[1]]
+        friendlyAName, found := getChainMapping(genConfig, networks[0])
+        if !found {
+            fmt.Println("Error getting chain mapping: ", err)
+            return
+        }
+
+        friendlyBName, found := getChainMapping(genConfig, networks[1])
+        if !found {
+            fmt.Println("Error getting chain mapping: ", err)
+            return
+        }
+        
+        fmt.Print("Friendly A Name: ", networks[0], friendlyAName)
+        fmt.Print("Friendly B Name: ", networks[1], friendlyBName)
 
         testConfig.AddSrcContract(friendlyAName, friendlyBName, template.OnRampAddress, 55555)
         testConfig.AddDestContract(friendlyBName, friendlyAName, template.OffRampAddress, template.CommitStoreAddress, "111111")

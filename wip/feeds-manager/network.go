@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"sort"
+
+	"github.com/BurntSushi/toml"
 )
 
 type Contract struct {
@@ -24,41 +27,14 @@ type Network struct {
     ChainType     string `json:"chainType"`
 }
 
-var laneIDMap = map[string]string{
-    "ARB,BASE": "37",
-    "ETH,OPT": "38",
-    "AVAX,ETH": "39",
-    "ETH,POLY": "40",
-    "AVAX,POLY": "41",
-    "BSC,ETH": "42",
-    "ARB,ETH": "43",
-    "BASE,ETH": "44",
-    "BASE,OPT": "46",
-    "AVAX,BSC": "47",
-    "BSC,POLY": "48",
-    "OPT,POLY": "49",
-    "BASE,BSC": "50",
-    "ETH,WEMIX": "51",
-    "KROMA,WEMIX": "52",
-    "ARB,POLY": "53",
-    "ARB,BSC": "54",
-    "ARB,OPT": "55",
-    "ARB,AVAX": "56",
-    "AVAX,OPT": "57",
-    "BASE,POLY": "58",
-    "BSC,OPT": "59",
-    "AVAX,BASE": "60",
-    "BSC,WEMIX": "61",
-    "AVAX,WEMIX": "62",
-    "POLY,WEMIX": "63",
-    "ARB,WEMIX": "64",
-    "OPT,WEMIX": "65",
-    "ETH,GNO": "68",
-    "GNO,POLY": "69",
+type GenConfig struct {
+    LaneIDMap map[string]string `toml:"laneIDMap"`
+    ChainIDMap map[string]string `toml:"chainIDMap"`
+    ChainMapping map[string]string `toml:"chainMappings"`
 }
 
 // Network mappings from short name to full name
-var networkMappings = map[string]string{
+var shortcutMappings = map[string]string{
     "KROMA": "Kroma Mainnet",
     "WEMIX": "WeMix Mainnet",
     "GNO":   "GnosisChain Mainnet",
@@ -69,32 +45,6 @@ var networkMappings = map[string]string{
     "ETH":   "Ethereum Mainnet",
     "ARB":   "Arbitrum Mainnet",
     "BASE":  "Base Mainnet",
-}
-
-var chainMappings = map[string]string{
-    "ethereum-mainnet-arbitrum-1":  "Arbitrum Mainnet",
-    "ethereum-mainnet-base-1":      "Base Mainnet",
-    "ethereum-mainnet-optimism-1":  "Optimism Mainnet",
-    "matic-mainnet":                "Polygon Mainnet",
-    "ethereum-mainnet":             "Ethereum Mainnet",
-    "avalanche-mainnet":            "Avalanche Mainnet",
-    "bsc-mainnet":                  "BSC Mainnet",
-    "ethereum-mainnet-kroma-1":     "Kroma Mainnet",
-    "wemix-mainnet":                "WeMix Mainnet",
-    "xdai-mainnet":                 "GnosisChain Mainnet",
-}
-
-var networkIDMap = map[string]string{
-    "OPT": "18",
-    "AVAX": "19",
-    "POLY": "20",
-    "ETH": "21",
-    "BSC": "22",
-    "ARB": "23",
-    "BASE": "24",
-    "WEMIX": "27",
-    "KROMA": "28",
-    "GNO": "30",
 }
 
 // map friendly network name to its native fee token address
@@ -111,16 +61,25 @@ var nativeFeeTokenMap = map[string]string{
     "GnosisChain Mainnet": "0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d",
 }
 
+// loadConfig loads the GenConfig from a TOML file.
+func loadGeneratorConfig() GenConfig {
+    var genConfig GenConfig
+    if _, err := toml.DecodeFile("config.toml", &genConfig); err != nil {
+        log.Fatalf("Error loading config: %v", err)
+    }
+    return genConfig
+}
+
 // PrintNetworkMappings prints all network mappings from the map
 func PrintNetworkMappings() {
     fmt.Println("Network Mappings:")
-    for shortName, fullName := range networkMappings {
+    for shortName, fullName := range shortcutMappings {
         fmt.Printf("%-10s%s\n", shortName, fullName)
     }
 }
 
-func getNetworkID(networkName string) (string, bool) {
-    id, found := networkIDMap[networkName]
+func getNetworkID(genConfig GenConfig, networkName string) (string, bool) {
+    id, found := genConfig.ChainIDMap[networkName]
     return id, found
 }
 
@@ -130,8 +89,16 @@ func normalizePair(net1, net2 string) (string, string) {
     return networks[0], networks[1]
 }
 
-func getLaneID(net1, net2 string) (string, bool) {
+func getLaneID(genConfig GenConfig, net1, net2 string) (string, bool) {
+    laneIDMap := genConfig.LaneIDMap
     net1, net2 = normalizePair(net1, net2)
     id, found := laneIDMap[net1+","+net2]
+    return id, found
+}
+
+func getChainMapping(genConfig GenConfig, chainName string) (string, bool) {
+
+    chainMapping := genConfig.ChainMapping
+    id, found := chainMapping[chainName]
     return id, found
 }
