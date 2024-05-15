@@ -34,20 +34,6 @@ type GenConfig struct {
     NativeFeeTokenMap map[string]string `toml:"nativeFeeTokenMap"`
 }
 
-// Network mappings from short name to full name
-// var shortcutMappings = map[string]string{
-//     "KROMA": "Kroma Mainnet",
-//     "WEMIX": "WeMix Mainnet",
-//     "GNO":   "GnosisChain Mainnet",
-//     "OPT":   "Optimism Mainnet",
-//     "AVAX":  "Avalanche Mainnet",
-//     "POLY":  "Polygon Mainnet",
-//     "BSC":   "BSC Mainnet",
-//     "ETH":   "Ethereum Mainnet",
-//     "ARB":   "Arbitrum Mainnet",
-//     "BASE":  "Base Mainnet",
-// }
-
 // loadConfig loads the GenConfig from a TOML file.
 func loadGeneratorConfig() GenConfig {
     var genConfig GenConfig
@@ -57,10 +43,20 @@ func loadGeneratorConfig() GenConfig {
     return genConfig
 }
 
+func getFullChainName (genConfig GenConfig, chainName string) string {
+    // if the chainName is not found in the shortcutMappings, return the chainName itself
+    if _, found := genConfig.ShortcutMappings[chainName]; !found {
+        return chainName
+    }
+    return genConfig.ShortcutMappings[chainName]
+}
+
+
 func getNetworkID(genConfig GenConfig, networkName string) (string, bool) {
     id, found := genConfig.ChainIDMap[networkName]
     return id, found
 }
+
 
 func normalizePair(net1, net2 string) (string, string) {
     networks := []string{net1, net2}
@@ -76,7 +72,6 @@ func getLaneID(genConfig GenConfig, net1, net2 string) (string, bool) {
 }
 
 func getChainMapping(genConfig GenConfig, chainName string) (string, bool) {
-
     chainMapping := genConfig.ChainMapping
     id, found := chainMapping[chainName]
     return id, found

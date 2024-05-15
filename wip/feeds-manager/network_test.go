@@ -19,8 +19,8 @@ func TestGetNetworkID(t *testing.T) {
 		expectedID  string
 		expectedFound bool
 	}{
-		{"OPT", "18", true},
-		{"AVAX", "19", true},
+		{"Optimism Mainnet", "18", true},
+		{"Avalanche Mainnet", "19", true},
 		{"UNKNOWN", "", false},
 	}
 
@@ -59,8 +59,8 @@ func TestGetLaneID(t *testing.T) {
 		expectedID string
 		expectedFound bool
 	}{
-		{"ARB", "BASE", "37", true},
-		{"ETH", "POLY", "40", true},
+		{"Arbitrum Mainnet", "Base Mainnet", "37", true},
+		{"Ethereum Mainnet", "Polygon Mainnet", "40", true},
 		{"UNKNOWN1", "UNKNOWN2", "", false},
 	}
 

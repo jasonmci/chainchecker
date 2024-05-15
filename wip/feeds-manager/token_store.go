@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 // Token struct holds information about each token.
 type Token struct {
 	Name     string // Token name
@@ -55,13 +53,8 @@ func populateConfigFromResponse(response CCIPChainResponse, store *TokenStore) {
 }
 
 // GetTokenDetails retrieves token details from a specific chain.
-func ( tokenStore *TokenStore) GetTokenDetails(genConfig GenConfig, shortChainName, tokenName string) (Token, bool) {
-	fullChainName, exists := genConfig.ShortcutMappings[shortChainName]
-	if !exists {
-        fmt.Println("Network mapping not found for:", shortChainName)
-        return Token{}, false
-    }
-
+func ( tokenStore *TokenStore) GetTokenDetails(genConfig GenConfig, fullChainName, tokenName string) (Token, bool) {
+	
 	for _, chain := range tokenStore.Chains {
 		if chain.Name == fullChainName {
 			for _, token := range chain.Tokens {

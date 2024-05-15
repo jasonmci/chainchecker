@@ -44,12 +44,16 @@ func main() {
     // Get the lane ID as a concatenation of the two network IDs
     partsA := strings.Split(a, ",")
     partsB := strings.Split(b, ",")
-    laneID, _ := getLaneID(genConfig, partsA[0], partsB[0])
 
-    //use networkId map to get the chain ID
-    chainAId, _ := getNetworkID(genConfig, partsA[0])
-    chainBId, _ := getNetworkID(genConfig, partsB[0])
+    // Convert shortcut names to full names if needed
+    chainAFullName := getFullChainName(genConfig, partsA[0])
+    chainBFullName := getFullChainName(genConfig, partsB[0])
 
+    laneID, _ := getLaneID(genConfig, chainAFullName, chainBFullName)
+
+    chainAId, _ := getNetworkID(genConfig, chainAFullName)
+    chainBId, _ := getNetworkID(genConfig, chainBFullName)
+    
     // Fetch the chain details
     chainA, _   := FetchChainDetails(sessionToken, chainAId)
     chainB, _   := FetchChainDetails(sessionToken, chainBId)
@@ -69,10 +73,10 @@ func main() {
     populateConfigFromResponse(*chainA, &tokenStore)
     populateConfigFromResponse(*chainB, &tokenStore)
 
-    feeTokenA, _  := tokenStore.GetTokenDetails(genConfig, partsA[0], partsA[1])
-    feeTokenB, _  := tokenStore.GetTokenDetails(genConfig, partsB[0], partsB[1])
-    txTokenA, _   := tokenStore.GetTokenDetails(genConfig, partsA[0], partsA[2])
-    txTokenB, _   := tokenStore.GetTokenDetails(genConfig, partsB[0], partsB[2])
+    feeTokenA, _  := tokenStore.GetTokenDetails(genConfig, chainAFullName, partsA[1])
+    feeTokenB, _  := tokenStore.GetTokenDetails(genConfig, chainBFullName, partsB[1])
+    txTokenA, _   := tokenStore.GetTokenDetails(genConfig, chainAFullName, partsA[2])
+    txTokenB, _   := tokenStore.GetTokenDetails(genConfig, chainBFullName, partsB[2])
     
     testConfig := TestConfig{
         LaneConfigs: make(map[string]LaneConfig),
