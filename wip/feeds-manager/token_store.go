@@ -55,8 +55,8 @@ func populateConfigFromResponse(response CCIPChainResponse, store *TokenStore) {
 }
 
 // GetTokenDetails retrieves token details from a specific chain.
-func (tokenStore *TokenStore) GetTokenDetails(shortChainName, tokenName string) (Token, bool) {
-	fullChainName, exists := shortcutMappings[shortChainName]
+func ( tokenStore *TokenStore) GetTokenDetails(genConfig GenConfig, shortChainName, tokenName string) (Token, bool) {
+	fullChainName, exists := genConfig.ShortcutMappings[shortChainName]
 	if !exists {
         fmt.Println("Network mapping not found for:", shortChainName)
         return Token{}, false

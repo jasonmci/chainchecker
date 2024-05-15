@@ -119,7 +119,7 @@ func (tc *TestConfig) UpdateWrappedNative(chainName, wrappedNative string) {
     }
 }
 
-func populateLaneConfigFromResponse( laneResponse *CCIPLaneResponse, chainAResponse *CCIPChainResponse, chainBResponse *CCIPChainResponse,
+func populateLaneConfigFromResponse( genConfig GenConfig, laneResponse *CCIPLaneResponse, chainAResponse *CCIPChainResponse, chainBResponse *CCIPChainResponse,
     config *TestConfig) {
 
     // var chainAName string
@@ -139,11 +139,11 @@ func populateLaneConfigFromResponse( laneResponse *CCIPLaneResponse, chainARespo
 
     config.AddSrcContract(chainAResponse.Data.CCIP.Chain.Network.Name, chainBResponse.Data.CCIP.Chain.Network.Name, "0x1", 111111)
     config.AddDestContract(chainAResponse.Data.CCIP.Chain.Network.Name, chainBResponse.Data.CCIP.Chain.Network.Name, "0x2", "0x3", "0x4")
-    config.UpdateWrappedNative(chainAResponse.Data.CCIP.Chain.Network.Name, nativeFeeTokenMap[chainAResponse.Data.CCIP.Chain.Network.Name])
+    config.UpdateWrappedNative(chainAResponse.Data.CCIP.Chain.Network.Name, genConfig.NativeFeeTokenMap[chainAResponse.Data.CCIP.Chain.Network.Name])
 
     config.AddChain(chainBResponse.Data.CCIP.Chain.Network.Name)
     config.AddSrcContract(chainBResponse.Data.CCIP.Chain.Network.Name, chainAResponse.Data.CCIP.Chain.Network.Name, "0x5", 111111)
     config.AddDestContract(chainBResponse.Data.CCIP.Chain.Network.Name, chainAResponse.Data.CCIP.Chain.Network.Name, "0x6", "0x7", "0x8")
-    config.UpdateWrappedNative(chainBResponse.Data.CCIP.Chain.Network.Name, nativeFeeTokenMap[chainBResponse.Data.CCIP.Chain.Network.Name])
+    config.UpdateWrappedNative(chainBResponse.Data.CCIP.Chain.Network.Name, genConfig.NativeFeeTokenMap[chainBResponse.Data.CCIP.Chain.Network.Name])
 
  }

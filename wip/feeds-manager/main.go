@@ -69,10 +69,10 @@ func main() {
     populateConfigFromResponse(*chainA, &tokenStore)
     populateConfigFromResponse(*chainB, &tokenStore)
 
-    feeTokenA, _  := tokenStore.GetTokenDetails(partsA[0], partsA[1])
-    feeTokenB, _  := tokenStore.GetTokenDetails(partsB[0], partsB[1])
-    txTokenA, _   := tokenStore.GetTokenDetails(partsA[0], partsA[2])
-    txTokenB, _   := tokenStore.GetTokenDetails(partsB[0], partsB[2])
+    feeTokenA, _  := tokenStore.GetTokenDetails(genConfig, partsA[0], partsA[1])
+    feeTokenB, _  := tokenStore.GetTokenDetails(genConfig, partsB[0], partsB[1])
+    txTokenA, _   := tokenStore.GetTokenDetails(genConfig, partsA[0], partsA[2])
+    txTokenB, _   := tokenStore.GetTokenDetails(genConfig, partsB[0], partsB[2])
     
     testConfig := TestConfig{
         LaneConfigs: make(map[string]LaneConfig),
@@ -111,7 +111,7 @@ func main() {
         chainBPriceRegistry = address
     }
 
-    populateLaneConfigFromResponse(lane, chainA, chainB, &testConfig)
+    populateLaneConfigFromResponse(genConfig, lane, chainA, chainB, &testConfig)
 
     testConfig.UpdateFeeToken(chainA.Data.CCIP.Chain.Network.Name, feeTokenA.Address, true)
     testConfig.AddBridgeToken(chainA.Data.CCIP.Chain.Network.Name, txTokenA.Address, txTokenA.PoolAddress)

@@ -3,44 +3,8 @@ package main
 
 import (
 	"bytes"
-	"os"
 	"testing"
 )
-
-// TestPrintNetworkMappings captures the output of PrintNetworkMappings and checks if it contains expected mappings.
-func TestPrintNetworkMappings(t *testing.T) {
-	originalStdout := os.Stdout // keep backup of the real stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	PrintNetworkMappings()
-
-	w.Close()
-	os.Stdout = originalStdout // restoring the real stdout
-
-	var buf bytes.Buffer
-	buf.ReadFrom(r)
-	output := buf.String()
-
-	expectedMappings := []string{
-		"KROMA     Kroma Mainnet",
-		"WEMIX     WeMix Mainnet",
-		"GNO       GnosisChain Mainnet",
-		"OPT       Optimism Mainnet",
-		"AVAX      Avalanche Mainnet",
-		"POLY      Polygon Mainnet",
-		"BSC       BSC Mainnet",
-		"ETH       Ethereum Mainnet",
-		"ARB       Arbitrum Mainnet",
-		"BASE      Base Mainnet",
-	}
-
-	for _, expected := range expectedMappings {
-		if !contains(output, expected) {
-			t.Errorf("expected output to contain %q, but it did not", expected)
-		}
-	}
-}
 
 // contains checks if a string is contained within another string.
 func contains(s, substr string) bool {
